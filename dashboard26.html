@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIRAS DSGN KPI DASHBOARD v1.3.7</title>
+    <!-- Biblioteker via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --niras-heritage-red: #982127; /* NIRAS Heritage Red 104 - UI Signatur */
+            --niras-blue: #004b87;
+            --niras-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-dark: #1e293b;
+            --niras-grey: #75787b;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--niras-bg);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--niras-heritage-red);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+        }
+
+        .header-title h1 {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .header-title h1 strong {
+            font-weight: 700;
+        }
+
+        .version-badge {
+            font-size: 0.75rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: 600;
+        }
+
+        .upload-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-upload {
+            background-color: white;
+            color: var(--niras-heritage-red);
+            padding: 0.6rem 1.4rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-upload:hover {
+            background-color: #f1f5f9;
+            transform: translateY(-1px);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .filter-bar {
+            background: white;
+            padding: 1rem 2.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--niras-heritage-red);
+            text-transform: uppercase;
+        }
+
+        .filter-group select {
+            padding: 0.5rem 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            background-color: #fff;
+            cursor: pointer;
+        }
+
+        main {
+            padding: 2rem 2.5rem;
+            flex-grow: 1;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .welcome-screen {
+            background: white;
+            border-radius: 12px;
+            padding: 4rem 2rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .chart-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.8rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-header {
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--niras-heritage-red);
+            padding-left: 12px;
+        }
+
+        .chart-header h2 {
+            margin: 0;
+            color: var(--niras-blue);
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 480px;
+            width: 100%;
+        }
+
+        .engagement-container {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .engagement-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            min-width: 200px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-top: 4px solid var(--niras-heritage-red);
+        }
+
+        .engagement-card h4 {
+            margin: 0;
+            color: var(--niras-grey);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .engagement-card .value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--niras-blue);
+            margin: 0.5rem 0;
+        }
+
+        footer {
+            padding: 1.5rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--niras-grey);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .hidden { display: none !important; }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .chart-container { height: 350px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-title">
+        <h1>NIRAS <strong>DSGN KPI DASHBOARD</strong></h1>
+        <span class="version-badge">v1.3.7</span>
+    </div>
+    <div class="upload-controls">
+        <span id="fileNameDisplay" style="font-size: 0.85rem; background: rgba(255, 255, 255, 0.1); padding: 5px 12px; border-radius: 20px; display: none;">Ingen fil valgt</span>
+        <label for="csvFile" class="btn-upload">UPLOAD DATA</label>
+        <input type="file" id="csvFile" accept=".csv">
+    </div>
+</header>
+
+<div id="filterBar" class="filter-bar" style="display: none;">
+    <div class="filter-group">
+        <label for="viewSelect">Visning:</label>
+        <select id="viewSelect" onchange="toggleDashboardView()">
+            <option value="financial">1. Financial Performance</option>
+            <option value="utilization">2. Staff Utilization (SU)</option>
+            <option value="projectCategory">3. Project Category Mix</option>
+            <option value="people">4. People & Culture</option>
+            <option value="size">5. Size & Organisation</option>
+            <option value="diversity">6. Diversity & Demographics</option>
+            <option value="education">7. Education Profile</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <label for="startPeriod">Fra:</label>
+        <select id="startPeriod" onchange="applyGlobalFilters()"></select>
+    </div>
+    <div class="filter-group">
+        <label for="endPeriod">Til:</label>
+        <select id="endPeriod" onchange="applyGlobalFilters()"></select>
+    </div>
+</div>
+
+<main>
+    <div id="noDataView" class="welcome-screen">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">📊</div>
+        <h2 style="color: var(--niras-blue);">Klar til Business Intelligence</h2>
+        <p>Upload din KPI-fil for at se data med den nye NIRAS graph-palette (1-11).</p>
+    </div>
+
+    <!-- View 1: Financial Performance -->
+    <div id="viewFinancial" class="dashboard-grid hidden">
+        <div class="chart-card">
+            <div class="chart-header"><h2>EBITA & Margin</h2></div>
+            <div class="chart-container"><canvas id="chartEBITA"></canvas></div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-header"><h2>Revenue & FM i projektporteføllje</h2></div>
+            <div class="chart-container"><canvas id="chartRevenue"></canvas></div>
+        </div>
+    </div>
+
+    <!-- View 2: Staff Utilization -->
+    <div id="viewUtilization" class="dashboard-grid hidden">
+        <div class="chart-card">
+            <div class="chart-header"><h2>SU i DSGN (%)</h2></div>
+            <div class="chart-container"><canvas id="chartSUDSGN"></canvas></div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-header"><h2>SU i Afdelinger (%)</h2></div>
+            <div class="chart-container"><canvas id="chartSUDepts"></canvas></div>
+        </div>
+    </div>
+
+    <!-- View 3: Project Category Mix -->
+    <div id="viewProjectCategory" class="dashboard-grid hidden">
+        <div class="chart-card">
+            <div class="chart-header"><h2>Kategoriudvikling (Area)</h2></div>
+            <div class="chart-container"><canvas id="chartCategoryArea"></canvas></div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-header"><h2>Kategoriudvikling (Bar)</h2></div>
+            <div class="chart-container"><canvas id="chartCategoryBar"></canvas></div>
+        </div>
+        <!-- Note til View 3 -->
+        <div class="chart-card" style="grid-column: 1 / -1; padding: 1.5rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; font-size: 0.85rem; line-height: 1.6; color: var(--text-dark);">
+                <div>
+                    <h3 style="margin-top: 0; color: var(--niras-blue); font-size: 0.95rem; font-weight: 700; text-transform: uppercase;">Følgende er inkluderet:</h3>
+                    <ul style="padding-left: 1.2rem; margin: 0; color: var(--niras-grey);">
+                        <li>Culture i Commercial buildings</li>
+                        <li>Institutions i Education</li>
+                        <li>Health i Commercial buildings</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 style="margin-top: 0; color: var(--niras-blue); font-size: 0.95rem; font-weight: 700; text-transform: uppercase;">Øvrige kategorier:</h3>
+                    <ul style="padding-left: 1.2rem; margin: 0; color: var(--niras-grey);">
+                        <li>Sports</li>
+                        <li>Parking</li>
+                        <li>Bridge</li>
+                        <li>Pharma, biotech</li>
+                        <li>N/A</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View 4: People & Culture -->
+    <div id="viewPeople" class="dashboard-grid hidden">
+        <div class="chart-card">
+            <div class="chart-header"><h2>Sygefravær (Illness)</h2></div>
+            <div class="chart-container"><canvas id="chartIllness"></canvas></div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-header"><h2>Medarbejderomsætning (Turnover)</h2></div>
+            <div class="chart-container"><canvas id="chartTurnover"></canvas></div>
+        </div>
+        <div class="chart-card" style="grid-column: 1 / -1; border: none; background: none; box-shadow: none; padding: 0;">
+            <div class="chart-header"><h2 style="text-align: center;">Employee Engagement (Årlig måling)</h2></div>
+            <div id="engagementStats" class="engagement-container">
+                <!-- Dynamisk indhold -->
+            </div>
+        </div>
+    </div>
+
+    <!-- View 5: Size & Organisation -->
+    <div id="viewSize" class="dashboard-grid hidden">
+        <div class="chart-card">
+            <div class="chart-header"><h2>BU DSGN (HC vs FTE)</h2></div>
+            <div class="chart-container"><canvas id="chartHCFTE"></canvas></div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-header"><h2>FTE i Afdelinger</h2></div>
+            <div class="chart-container"><canvas id="chartFTEDepts"></canvas></div>
+        </div>
+    </div>
+
+    <!-- View 6: Diversity & Demographics -->
+    <div id="viewDiversity" class="dashboard-grid hidden">
+        <div class="chart-card">
+            <div class="chart-header"><h2>Kønsfordeling (Gender)</h2></div>
+            <div class="chart-container"><canvas id="chartGender"></canvas></div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-header"><h2>Aldersudvikling (Age)</h2></div>
+            <div class="chart-container"><canvas id="chartAge"></canvas></div>
+        </div>
+    </div>
+
+    <!-- View 7: Education -->
+    <div id="viewEducation" class="dashboard-grid hidden">
+        <div class="chart-card">
+            <div class="chart-header"><h2>Teknisk profil</h2></div>
+            <div class="chart-container"><canvas id="chartTechEdu"></canvas></div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-header"><h2>Akademisk profil</h2></div>
+            <div class="chart-container"><canvas id="chartAcademicEdu"></canvas></div>
+        </div>
+    </div>
+</main>
+
+<footer>
+    NIRAS A/S | Fortrolig Ledelsesinformation
+</footer>
+
+<script>
+    // Palette baseret på brugerens 11 CVI-farver til grafer
+    const palette = [
+        '#0c5036', // NO.1
+        '#c9ac68', // NO.2
+        '#737f6b', // NO.3
+        '#c5c2b1', // NO.4
+        '#0f4c64', // NO.5
+        '#809ead', // NO.6
+        '#754e3f', // NO.7
+        '#cf9e76', // NO.8
+        '#132aba', // NO.9
+        '#575852', // NO.10
+        '#a5cf76'  // NO.11
+    ];
+
+    let activeCharts = {};
+    let globalData = {
+        labels: [],
+        ebita: [],
+        margin: [],
+        revenue: [],
+        fm: [],
+        suDsgn: [],
+        suDepts: [],
+        categories: {},
+        illnessShort: [],
+        illnessLong: [],
+        turnoverOwn: [],
+        turnoverOther: [],
+        engagement: [],
+        hc: [],
+        fte: [],
+        fteDepts: [],
+        genderEmployees: [],
+        genderLeaders: [],
+        ageData: [],
+        eduEngineers: [],
+        eduTechnicians: [],
+        eduAcademics: [],
+        eduBachelors: [],
+        eduOther: []
+    };
+
+    document.getElementById('csvFile').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        document.getElementById('fileNameDisplay').textContent = file.name;
+        document.getElementById('fileNameDisplay').style.display = 'inline-block';
+        
+        Papa.parse(file, {
+            header: false,
+            skipEmptyLines: true,
+            delimiter: ";",
+            complete: function(results) {
+                if (results.data && results.data.length > 0) {
+                    processDashboardData(results.data);
+                }
+            }
+        });
+    });
+
+    function cleanNum(val) {
+        if (val === undefined || val === null || val === "") return 0;
+        let str = val.toString().trim();
+        if (str.endsWith('%')) str = str.slice(0, -1);
+        str = str.replace(/\.(?=\d{3})/g, '').replace(',', '.');
+        let num = parseFloat(str);
+        return isNaN(num) ? 0 : num;
+    }
+
+    function processDashboardData(rows) {
+        const cleanRows = rows.map(row => row.map(cell => cell ? cell.trim() : ""));
+        globalData.labels = cleanRows[0].slice(2);
+
+        const getRow = (identifier, exact = false) => {
+            const isId = !isNaN(parseInt(identifier)) && identifier.toString().length < 4;
+            const r = cleanRows.find(row => {
+                if (isId) return row[0] === identifier.toString();
+                if (!row[1]) return false;
+                const cell = row[1].toLowerCase();
+                const search = identifier.toLowerCase();
+                return exact ? cell === search : cell.includes(search);
+            });
+            return r ? r.slice(2).map(v => cleanNum(v)) : [];
+        };
+
+        globalData.ebita = getRow('1');
+        globalData.margin = getRow('2');
+        globalData.revenue = getRow('3');
+        globalData.fm = getRow('4');
+        globalData.suDsgn = getRow('5');
+
+        globalData.suDepts = [];
+        cleanRows.forEach(row => {
+            if (row[1] && row[1].includes(', SU')) {
+                globalData.suDepts.push({
+                    name: row[1].replace(', SU', '').trim(),
+                    values: row.slice(2).map(v => cleanNum(v))
+                });
+            }
+        });
+
+        const catConfig = [
+            { id: '11', name: 'Offices' },
+            { id: '12', name: 'Housing' },
+            { id: '13', name: 'Industrial buildings' },
+            { id: '14', name: 'Commercial buildings' },
+            { id: '15', name: 'Education' }
+        ];
+        globalData.categories = {};
+        catConfig.forEach(cat => {
+            const data = getRow(cat.id);
+            if (data.length > 0) globalData.categories[cat.name] = data;
+        });
+
+        globalData.illnessShort = getRow('16');
+        globalData.illnessLong = getRow('17');
+        globalData.turnoverOwn = getRow('18');
+        globalData.turnoverOther = getRow('19');
+        globalData.engagement = getRow('20');
+        globalData.hc = getRow('21');
+        globalData.fte = getRow('22');
+        
+        const fteDeptNames = ['ASIC', 'BEST', 'ELIN', 'PLED', 'VIKA'];
+        globalData.fteDepts = [];
+        fteDeptNames.forEach(deptName => {
+            const vals = getRow(deptName + ', FTE', true);
+            if (vals.length > 0) globalData.fteDepts.push({ name: deptName, values: vals });
+        });
+
+        globalData.genderEmployees = getRow('28');
+        globalData.genderLeaders = getRow('29');
+        globalData.ageData = getRow('30');
+        globalData.eduEngineers = getRow('31');
+        globalData.eduTechnicians = getRow('32');
+        globalData.eduAcademics = getRow('33');
+        globalData.eduBachelors = getRow('34');
+        globalData.eduOther = getRow('35');
+
+        populateDropdowns();
+        document.getElementById('noDataView').classList.add('hidden');
+        document.getElementById('filterBar').style.display = 'flex';
+        toggleDashboardView();
+    }
+
+    function populateDropdowns() {
+        const start = document.getElementById('startPeriod');
+        const end = document.getElementById('endPeriod');
+        const options = globalData.labels.map((l, i) => `<option value="${i}">${l}</option>`).join('');
+        start.innerHTML = options;
+        end.innerHTML = options;
+        end.value = globalData.labels.length - 1;
+    }
+
+    function toggleDashboardView() {
+        const view = document.getElementById('viewSelect').value;
+        const viewIds = ['viewFinancial', 'viewUtilization', 'viewProjectCategory', 'viewPeople', 'viewSize', 'viewDiversity', 'viewEducation'];
+        viewIds.forEach(id => document.getElementById(id).classList.add('hidden'));
+        const targetId = 'view' + view.charAt(0).toUpperCase() + view.slice(1);
+        const el = document.getElementById(targetId);
+        if (el) el.classList.remove('hidden');
+        applyGlobalFilters();
+    }
+
+    function applyGlobalFilters() {
+        const s = parseInt(document.getElementById('startPeriod').value);
+        const e = parseInt(document.getElementById('endPeriod').value);
+        const view = document.getElementById('viewSelect').value;
+        const filteredLabels = globalData.labels.slice(s, e + 1);
+
+        if (view === 'financial') renderFinancialCharts(filteredLabels, s, e);
+        else if (view === 'utilization') renderUtilizationCharts(filteredLabels, s, e);
+        else if (view === 'projectCategory') renderCategoryCharts(filteredLabels, s, e);
+        else if (view === 'people') renderPeopleCharts(filteredLabels, s, e);
+        else if (view === 'size') renderSizeCharts(filteredLabels, s, e);
+        else if (view === 'diversity') renderDiversityCharts(filteredLabels, s, e);
+        else if (view === 'education') renderEducationCharts(filteredLabels, s, e);
+    }
+
+    function renderFinancialCharts(labels, s, e) {
+        const ctx1 = document.getElementById('chartEBITA').getContext('2d');
+        if (activeCharts.ebita) activeCharts.ebita.destroy();
+        activeCharts.ebita = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    { label: 'EBITA (tDKK)', data: globalData.ebita.slice(s, e+1), backgroundColor: palette[1], yAxisID: 'y', order: 2, borderRadius: 4 },
+                    { label: 'Margin (%)', data: globalData.margin.slice(s, e+1), type: 'line', borderColor: palette[0], backgroundColor: palette[0], yAxisID: 'y1', order: 1, tension: 0.3, borderWidth: 3, pointRadius: 4 }
+                ]
+            },
+            options: getDualAxisOptions('EBITA tDKK', 'EBITA %')
+        });
+
+        const ctx2 = document.getElementById('chartRevenue').getContext('2d');
+        if (activeCharts.revenue) activeCharts.revenue.destroy();
+        activeCharts.revenue = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    { label: 'Revenue (tDKK)', data: globalData.revenue.slice(s, e+1), backgroundColor: palette[5], opacity: 0.6, yAxisID: 'y', order: 2, borderRadius: 4 },
+                    { label: 'FM i projektportefølje', data: globalData.fm.slice(s, e+1), type: 'line', borderColor: palette[9], borderDash: [5, 5], yAxisID: 'y1', order: 1, borderWidth: 2 }
+                ]
+            },
+            options: getDualAxisOptions('Revenue tDKK', 'Faktor', 1.5, 2.2)
+        });
+    }
+
+    function renderUtilizationCharts(labels, s, e) {
+        const ctx3 = document.getElementById('chartSUDSGN').getContext('2d');
+        if (activeCharts.suDsgn) activeCharts.suDsgn.destroy();
+        activeCharts.suDsgn = new Chart(ctx3, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{ label: 'SU i DSGN (%)', data: globalData.suDsgn.slice(s, e+1), borderColor: palette[0], backgroundColor: 'rgba(12, 80, 54, 0.1)', fill: true, tension: 0.3, pointRadius: 5, borderWidth: 4 }]
+            },
+            options: getSingleAxisOptions('%', 60, 90)
+        });
+
+        const ctx4 = document.getElementById('chartSUDepts').getContext('2d');
+        if (activeCharts.suDepts) activeCharts.suDepts.destroy();
+        const datasets = globalData.suDepts.map((dept, i) => ({
+            label: dept.name,
+            data: dept.values.slice(s, e+1),
+            borderColor: palette[(i + 1) % palette.length],
+            tension: 0.2, borderWidth: 2.5, pointRadius: 4
+        }));
+        activeCharts.suDepts = new Chart(ctx4, { type: 'line', data: { labels: labels, datasets: datasets }, options: getSingleAxisOptions('%') });
+    }
+
+    function renderCategoryCharts(labels, s, e) {
+        const catNames = ['Offices', 'Housing', 'Industrial buildings', 'Commercial buildings', 'Education'];
+        const timeCount = labels.length;
+        const normalizedDataMatrix = catNames.map(name => {
+            const raw = globalData.categories[name];
+            return raw ? raw.slice(s, e+1) : new Array(timeCount).fill(0);
+        });
+        
+        const finalDatasets = catNames.map((name, catIdx) => {
+            const data = [];
+            for(let t = 0; t < timeCount; t++) {
+                let sumAtT = 0;
+                for(let c = 0; c < catNames.length; c++) sumAtT += normalizedDataMatrix[c][t];
+                data.push(sumAtT > 0 ? (normalizedDataMatrix[catIdx][t] / sumAtT) * 100 : 0);
+            }
+            return { 
+                label: name, 
+                data: data, 
+                backgroundColor: palette[catIdx % palette.length], 
+                fill: true, 
+                tension: 0.1, 
+                pointRadius: 6,      
+                hitRadius: 10,       
+                hoverRadius: 8,      
+                pointBorderColor: 'rgba(255, 255, 255, 0.5)',
+                pointBorderWidth: 1
+            };
+        });
+
+        const ctxArea = document.getElementById('chartCategoryArea').getContext('2d');
+        if (activeCharts.catArea) activeCharts.catArea.destroy();
+        activeCharts.catArea = new Chart(ctxArea, { 
+            type: 'line', 
+            data: { labels: labels, datasets: finalDatasets }, 
+            options: getStackedOptions('%', true) 
+        });
+
+        const ctxBar = document.getElementById('chartCategoryBar').getContext('2d');
+        if (activeCharts.catBar) activeCharts.catBar.destroy();
+        activeCharts.catBar = new Chart(ctxBar, { type: 'bar', data: { labels: labels, datasets: finalDatasets }, options: getStackedOptions('%', true) });
+    }
+
+    function renderPeopleCharts(labels, s, e) {
+        const ctxI = document.getElementById('chartIllness').getContext('2d');
+        if (activeCharts.illness) activeCharts.illness.destroy();
+        activeCharts.illness = new Chart(ctxI, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    { label: 'Short Term (%)', data: globalData.illnessShort.slice(s, e+1), backgroundColor: palette[0] },
+                    { label: 'Long Term (%)', data: globalData.illnessLong.slice(s, e+1), backgroundColor: palette[2] }
+                ]
+            },
+            // Opdateret enhed for Sygefravær
+            options: getStackedOptions('% avg. pr. kvartal', false)
+        });
+        const ctxT = document.getElementById('chartTurnover').getContext('2d');
+        if (activeCharts.turnover) activeCharts.turnover.destroy();
+        activeCharts.turnover = new Chart(ctxT, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    { label: 'Own (%)', data: globalData.turnoverOwn.slice(s, e+1), backgroundColor: palette[4] },
+                    { label: 'Other (%)', data: globalData.turnoverOther.slice(s, e+1), backgroundColor: palette[5] }
+                ]
+            },
+            // Opdateret enhed for Medarbejderomsætning
+            options: getStackedOptions('% succesivt YTD', false)
+        });
+        const container = document.getElementById('engagementStats');
+        container.innerHTML = '';
+        const years = [...new Set(labels.map(l => l.substring(0,4)))];
+        years.forEach(year => {
+            const yearIndex = globalData.labels.findIndex(l => l.startsWith(year));
+            const score = globalData.engagement[yearIndex] || 0;
+            if(score > 0) {
+                const card = document.createElement('div');
+                card.className = 'engagement-card';
+                card.innerHTML = `<h4>Status ${year}</h4><div class="value">${score.toLocaleString('da-DK')}</div><p style="font-size:0.7rem; color:var(--niras-grey);">Engagement Score</p>`;
+                container.appendChild(card);
+            }
+        });
+    }
+
+    function renderSizeCharts(labels, s, e) {
+        const ctxHC = document.getElementById('chartHCFTE').getContext('2d');
+        if (activeCharts.hcFte) activeCharts.hcFte.destroy();
+        activeCharts.hcFte = new Chart(ctxHC, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    { label: 'Headcount (HC)', data: globalData.hc.slice(s, e+1), backgroundColor: palette[8], borderRadius: 4 },
+                    { label: 'FTE', data: globalData.fte.slice(s, e+1), backgroundColor: palette[10], borderRadius: 4 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: 'Antal', font: { weight: 'bold' } } }
+                }
+            }
+        });
+        const ctxDepts = document.getElementById('chartFTEDepts').getContext('2d');
+        if (activeCharts.fteDepts) activeCharts.fteDepts.destroy();
+        const datasets = globalData.fteDepts.map((dept, i) => ({
+            label: dept.name,
+            data: dept.values.slice(s, e+1),
+            borderColor: palette[(i + 1) % palette.length],
+            backgroundColor: palette[(i + 1) % palette.length],
+            tension: 0.2, pointRadius: 4, fill: false, borderWidth: 2
+        }));
+        activeCharts.fteDepts = new Chart(ctxDepts, {
+            type: 'line', data: { labels: labels, datasets: datasets },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { y: { beginAtZero: false, title: { display: true, text: 'FTE', font: { weight: 'bold' } } } }
+            }
+        });
+    }
+
+    function renderDiversityCharts(labels, s, e) {
+        const ctxG = document.getElementById('chartGender').getContext('2d');
+        if (activeCharts.gender) activeCharts.gender.destroy();
+        activeCharts.gender = new Chart(ctxG, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    { label: 'Gender, employees (%)', data: globalData.genderEmployees.slice(s, e+1), borderColor: palette[4], backgroundColor: palette[4], tension: 0.3, pointRadius: 5 },
+                    { label: 'Gender, leaders (%)', data: globalData.genderLeaders.slice(s, e+1), borderColor: palette[0], backgroundColor: palette[0], tension: 0.3, pointRadius: 5 }
+                ]
+            },
+            options: getSingleAxisOptions('%', 20, 30)
+        });
+
+        const ctxA = document.getElementById('chartAge').getContext('2d');
+        if (activeCharts.age) activeCharts.age.destroy();
+        activeCharts.age = new Chart(ctxA, {
+            type: 'line',
+            data: { 
+                labels: labels, 
+                datasets: [{
+                    label: 'Gennemsnitsalder',
+                    data: globalData.ageData.slice(s, e+1),
+                    borderColor: palette[1],
+                    backgroundColor: 'rgba(201, 172, 104, 0.1)',
+                    tension: 0.2, fill: true, pointRadius: 4, borderWidth: 3
+                }] 
+            },
+            options: getSingleAxisOptions('år', 44, 55, 1)
+        });
+    }
+
+    function renderEducationCharts(labels, s, e) {
+        const ctxTech = document.getElementById('chartTechEdu').getContext('2d');
+        if (activeCharts.techEdu) activeCharts.techEdu.destroy();
+        activeCharts.techEdu = new Chart(ctxTech, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    { label: 'All Engineers', data: globalData.eduEngineers.slice(s, e+1), borderColor: palette[0], backgroundColor: palette[0], tension: 0.2, pointRadius: 4, borderWidth: 3 },
+                    { label: 'All Technicians', data: globalData.eduTechnicians.slice(s, e+1), borderColor: palette[1], backgroundColor: palette[1], tension: 0.2, pointRadius: 4, borderWidth: 2 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { y: { min: 35, max: 80, beginAtZero: false, title: { display: true, text: 'Antal', font: { weight: 'bold' } }, ticks: { stepSize: 5, precision: 0 } } }
+            }
+        });
+        const ctxAcad = document.getElementById('chartAcademicEdu').getContext('2d');
+        if (activeCharts.acadEdu) activeCharts.acadEdu.destroy();
+        activeCharts.acadEdu = new Chart(ctxAcad, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    { label: 'All Academics', data: globalData.eduAcademics.slice(s, e+1), borderColor: palette[4], backgroundColor: palette[4], tension: 0.2, pointRadius: 4 },
+                    { label: 'All Bachelors', data: globalData.eduBachelors.slice(s, e+1), borderColor: palette[5], backgroundColor: palette[5], tension: 0.2, pointRadius: 4 },
+                    { label: 'All Other', data: globalData.eduOther.slice(s, e+1), borderColor: palette[3], backgroundColor: palette[3], tension: 0.2, pointRadius: 4 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { y: { min: 0, max: 10, ticks: { stepSize: 1, precision: 0 }, title: { display: true, text: 'Antal', font: { weight: 'bold' } } } }
+            }
+        });
+    }
+
+    function getDualAxisOptions(l, r, rMin, rMax) {
+        return {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { 
+                legend: { position: 'top', labels: { usePointStyle: true, font: { size: 11 } } } 
+            },
+            scales: {
+                y: { type: 'linear', position: 'left', title: { display: true, text: l, font: { weight: 'bold' } } },
+                y1: { type: 'linear', position: 'right', title: { display: true, text: r, font: { weight: 'bold' } }, grid: { drawOnChartArea: false }, min: rMin, max: rMax }
+            }
+        };
+    }
+
+    function getSingleAxisOptions(unit, min, max, precision = undefined) {
+        return {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { 
+                legend: { position: 'top', labels: { usePointStyle: true, font: { size: 11 } } },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const displayVal = context.parsed.y.toFixed(precision !== undefined ? precision : 1);
+                            return ` ${context.dataset.label}: ${displayVal} ${unit}`;
+                        }
+                    }
+                }
+            },
+            scales: { 
+                y: { 
+                    min: min, max: max,
+                    title: { display: true, text: unit, font: { weight: 'bold' } }, 
+                    ticks: { 
+                        callback: v => v,
+                        precision: 0 
+                    } 
+                }
+            }
+        };
+    }
+
+    function getStackedOptions(l, force100 = true) {
+        return {
+            responsive: true, maintainAspectRatio: false,
+            interaction: {
+                mode: 'nearest',
+                intersect: false, 
+            },
+            plugins: { 
+                legend: { position: 'top', labels: { usePointStyle: true, font: { size: 10 } } },
+                tooltip: { 
+                    callbacks: { 
+                        label: function(context) { return ` ${context.dataset.label}: ${context.parsed.y.toFixed(1)}%`; } 
+                    } 
+                }
+            },
+            scales: {
+                y: { 
+                    stacked: true, 
+                    max: force100 ? 100 : undefined, 
+                    beginAtZero: true, 
+                    title: { display: true, text: l, font: { weight: 'bold' } }, 
+                    ticks: { 
+                        callback: v => v 
+                    } 
+                },
+                x: { stacked: true }
+            }
+        };
+    }
+</script>
+</body>
+</html>

@@ -3,25 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NIRAS DSGN KPI DASHBOARD v1.3.7</title>
+    <title>NIRAS DSGN KPI DASHBOARD v1.4.0</title>
     <!-- Biblioteker via CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Aptos loades lokalt (Windows 11 / Microsoft 365). Webfont-fallback: Open Sans (samme designer) + Source Serif 4 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --niras-heritage-red: #982127; /* NIRAS Heritage Red 104 - UI Signatur */
-            --niras-blue: #004b87;
-            --niras-bg: #f8fafc;
-            --card-bg: #ffffff;
-            --border-color: #e2e8f0;
-            --text-dark: #1e293b;
-            --niras-grey: #75787b;
+            /* NIRAS Heritage colours (CVI 2025) */
+            --niras-red: #BA1223;        /* 100 - PANTONE 187C */
+            --niras-red-104: #700B15;    /* 104 */
+            --niras-red-105: #4A070E;    /* 105 */
+            --niras-sand: #F2E2D5;       /* 200 */
+            --niras-light-grey: #DDDDDD; /* 111 */
+            --niras-grey: #8C8C8C;       /* 144 */
+            --niras-dark-grey: #404040;  /* 166 */
+            --type-dark: #202020;        /* TYPE */
+            --type-red: #38050A;         /* TYPE */
+            --card-bg: #FFFFFF;
+
+            --font-sans: 'Aptos', 'Open Sans', 'Segoe UI', system-ui, sans-serif;
+            --font-serif: 'Aptos Serif', 'Source Serif 4', Georgia, serif;
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: var(--niras-bg);
-            color: var(--text-dark);
+            font-family: var(--font-sans);
+            background-color: var(--niras-sand);
+            color: var(--type-dark);
             margin: 0;
             padding: 0;
             display: flex;
@@ -30,13 +41,13 @@
         }
 
         header {
-            background-color: var(--niras-heritage-red);
+            background: linear-gradient(120deg, var(--niras-red) 0%, var(--niras-red-104) 70%, var(--niras-red-105) 100%);
             color: white;
-            padding: 1rem 2rem;
+            padding: 1rem 2.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(74, 7, 14, 0.25);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -44,29 +55,44 @@
 
         .header-title {
             display: flex;
-            align-items: baseline;
-            gap: 12px;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .header-logo {
+            height: 21px;
+            width: auto;
+            /* Rødt logo vendes til den hvide CVI-variant på rød baggrund.
+               Flammen over A'et fylder toppen af filen, så logoet løftes
+               ~5px for at bogstaverne flugter optisk med titlen. */
+            filter: brightness(0) invert(1);
+            display: block;
+            transform: translateY(-5px);
+        }
+
+        .header-divider {
+            width: 1px;
+            height: 22px;
+            background: rgba(255, 255, 255, 0.35);
         }
 
         .header-title h1 {
             margin: 0;
-            font-size: 1.3rem;
-            font-weight: 300;
-            letter-spacing: 0.5px;
-        }
-
-        .header-title h1 strong {
-            font-weight: 700;
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            font-weight: 400;
+            letter-spacing: 0.3px;
         }
 
         .version-badge {
-            font-size: 0.75rem;
-            background: rgba(255, 255, 255, 0.2);
+            font-size: 0.72rem;
+            background: rgba(255, 255, 255, 0.18);
             color: white;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-family: monospace;
+            padding: 2px 9px;
+            border-radius: 3px;
+            font-family: var(--font-sans);
             font-weight: 600;
+            letter-spacing: 0.5px;
         }
 
         .upload-controls {
@@ -77,19 +103,20 @@
 
         .btn-upload {
             background-color: white;
-            color: var(--niras-heritage-red);
+            color: var(--niras-red);
             padding: 0.6rem 1.4rem;
             border: none;
-            border-radius: 6px;
+            border-radius: 3px;
             cursor: pointer;
             font-weight: 700;
             transition: all 0.2s ease;
-            font-size: 0.9rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(74, 7, 14, 0.2);
         }
 
         .btn-upload:hover {
-            background-color: #f1f5f9;
+            background-color: var(--niras-sand);
             transform: translateY(-1px);
         }
 
@@ -98,14 +125,13 @@
         }
 
         .filter-bar {
-            background: white;
+            background: var(--card-bg);
             padding: 1rem 2.5rem;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--niras-light-grey);
             display: flex;
             flex-wrap: wrap;
             gap: 2rem;
             align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
         .filter-group {
@@ -115,20 +141,27 @@
         }
 
         .filter-group label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--niras-heritage-red);
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--niras-red);
             text-transform: uppercase;
+            letter-spacing: 0.6px;
         }
 
         .filter-group select {
             padding: 0.5rem 0.8rem;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
+            border: 1px solid var(--niras-light-grey);
+            border-radius: 3px;
             font-size: 0.9rem;
-            color: var(--text-dark);
+            font-family: var(--font-sans);
+            color: var(--type-dark);
             background-color: #fff;
             cursor: pointer;
+        }
+
+        .filter-group select:focus {
+            outline: 2px solid var(--niras-red);
+            outline-offset: 1px;
         }
 
         main {
@@ -141,12 +174,25 @@
         }
 
         .welcome-screen {
-            background: white;
-            border-radius: 12px;
+            background: var(--card-bg);
+            border-radius: 4px;
             padding: 4rem 2rem;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(74, 7, 14, 0.06);
+            border: 1px solid var(--niras-light-grey);
+        }
+
+        .welcome-screen h2 {
+            font-family: var(--font-serif);
+            font-weight: 400;
+            font-size: 1.8rem;
+            color: var(--type-red);
+        }
+
+        .welcome-logo {
+            height: 44px;
+            width: auto;
+            margin-bottom: 1.5rem;
         }
 
         .dashboard-grid {
@@ -157,27 +203,27 @@
 
         .chart-card {
             background: var(--card-bg);
-            border-radius: 12px;
+            border-radius: 4px;
             padding: 1.8rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-            border: 1px solid var(--border-color);
+            box-shadow: 0 6px 15px -3px rgba(74, 7, 14, 0.07);
+            border: 1px solid var(--niras-light-grey);
             display: flex;
             flex-direction: column;
         }
 
         .chart-header {
             margin-bottom: 2rem;
-            border-left: 4px solid var(--niras-heritage-red);
-            padding-left: 12px;
+            border-left: 4px solid var(--niras-red);
+            padding-left: 14px;
         }
 
         .chart-header h2 {
             margin: 0;
-            color: var(--niras-blue);
-            font-size: 1rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            color: var(--type-red);
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            font-weight: 400;
+            letter-spacing: 0.2px;
         }
 
         .chart-container {
@@ -195,27 +241,30 @@
         }
 
         .engagement-card {
-            background: white;
-            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            border: 1px solid var(--niras-light-grey);
             padding: 1.5rem;
-            border-radius: 12px;
+            border-radius: 4px;
             text-align: center;
             min-width: 200px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            border-top: 4px solid var(--niras-heritage-red);
+            box-shadow: 0 4px 6px rgba(74, 7, 14, 0.06);
+            border-top: 4px solid var(--niras-red);
         }
 
         .engagement-card h4 {
             margin: 0;
             color: var(--niras-grey);
             font-size: 0.8rem;
+            font-weight: 600;
             text-transform: uppercase;
+            letter-spacing: 0.6px;
         }
 
         .engagement-card .value {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--niras-blue);
+            font-family: var(--font-serif);
+            font-size: 2.6rem;
+            font-weight: 700;
+            color: var(--niras-red);
             margin: 0.5rem 0;
         }
 
@@ -223,8 +272,8 @@
             padding: 1.5rem;
             text-align: center;
             font-size: 0.8rem;
-            color: var(--niras-grey);
-            border-top: 1px solid var(--border-color);
+            color: var(--niras-dark-grey);
+            border-top: 1px solid rgba(56, 5, 10, 0.12);
         }
 
         .hidden { display: none !important; }
@@ -239,8 +288,10 @@
 
 <header>
     <div class="header-title">
-        <h1>NIRAS <strong>DSGN KPI DASHBOARD</strong></h1>
-        <span class="version-badge">v1.3.7</span>
+        <img class="header-logo" src="data:image/png;base64,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" alt="NIRAS">
+        <span class="header-divider"></span>
+        <h1>DSGN KPI Dashboard</h1>
+        <span class="version-badge">v1.4.0</span>
     </div>
     <div class="upload-controls">
         <span id="fileNameDisplay" style="font-size: 0.85rem; background: rgba(255, 255, 255, 0.1); padding: 5px 12px; border-radius: 20px; display: none;">Ingen fil valgt</span>
@@ -274,9 +325,9 @@
 
 <main>
     <div id="noDataView" class="welcome-screen">
-        <div style="font-size: 4rem; margin-bottom: 1rem;">📊</div>
-        <h2 style="color: var(--niras-blue);">Klar til Business Intelligence</h2>
-        <p>Upload din KPI-fil for at se data med den nye NIRAS graph-palette (1-11).</p>
+        <img class="welcome-logo" src="data:image/png;base64,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" alt="NIRAS">
+        <h2>Klar til Business Intelligence</h2>
+        <p>Upload din KPI-fil [csv].</p>
     </div>
 
     <!-- View 1: Financial Performance -->
@@ -317,7 +368,7 @@
         <div class="chart-card" style="grid-column: 1 / -1; padding: 1.5rem;">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; font-size: 0.85rem; line-height: 1.6; color: var(--text-dark);">
                 <div>
-                    <h3 style="margin-top: 0; color: var(--niras-blue); font-size: 0.95rem; font-weight: 700; text-transform: uppercase;">Følgende er inkluderet:</h3>
+                    <h3 style="margin-top: 0; color: var(--type-red); font-size: 1.05rem; font-weight: 400; font-family: var(--font-serif);">Følgende er inkluderet:</h3>
                     <ul style="padding-left: 1.2rem; margin: 0; color: var(--niras-grey);">
                         <li>Culture i Commercial buildings</li>
                         <li>Institutions i Education</li>
@@ -325,7 +376,7 @@
                     </ul>
                 </div>
                 <div>
-                    <h3 style="margin-top: 0; color: var(--niras-blue); font-size: 0.95rem; font-weight: 700; text-transform: uppercase;">Øvrige kategorier:</h3>
+                    <h3 style="margin-top: 0; color: var(--type-red); font-size: 1.05rem; font-weight: 400; font-family: var(--font-serif);">Øvrige kategorier:</h3>
                     <ul style="padding-left: 1.2rem; margin: 0; color: var(--niras-grey);">
                         <li>Sports</li>
                         <li>Parking</li>
@@ -398,7 +449,13 @@
 </footer>
 
 <script>
-    // Palette baseret på brugerens 11 CVI-farver til grafer
+    // Chart.js sat op med NIRAS CVI: Aptos-fontstakken og TYPE-farven #202020
+    Chart.defaults.font.family = "'Aptos', 'Open Sans', 'Segoe UI', system-ui, sans-serif";
+    Chart.defaults.font.size = 12;
+    Chart.defaults.color = '#202020';
+    Chart.defaults.borderColor = 'rgba(32, 32, 32, 0.08)';
+
+    // NIRAS main graph colours NO.1 - NO.11 (CVI 2025)
     const palette = [
         '#0c5036', // NO.1
         '#c9ac68', // NO.2
@@ -766,7 +823,7 @@
                     { label: 'Gender, leaders (%)', data: globalData.genderLeaders.slice(s, e+1), borderColor: palette[0], backgroundColor: palette[0], tension: 0.3, pointRadius: 5 }
                 ]
             },
-            options: getSingleAxisOptions('%', 20, 30)
+            options: getSingleAxisOptions('%', 15, 30)
         });
 
         const ctxA = document.getElementById('chartAge').getContext('2d');

@@ -1,0 +1,5 @@
+# Tal må aldrig ligge i dette offentlige repo
+*.pdf
+*.csv
+*.xlsx
+NIRAS_maanedsregnskab_*.html

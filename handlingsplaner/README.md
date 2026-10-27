@@ -17,7 +17,8 @@ Dashboard over handlingsplanerne i Buildings Design East (DSGN) i NIRAS CVI.
 ## Rapport som PDF
 
 - Klik på »Lav rapport«. Rapporten følger dashboardets filtre (afdeling, spor, status og søgning) og tabellens sortering, så du filtrerer først og printer bagefter.
-- Vælg titel, indhold (overblik, handlingsliste og detaljer for hver handling) og om handlingerne skal grupperes efter afdeling eller spor.
+- Vælg titel, indhold (overblik, handlinger og detaljer), gruppering efter afdeling eller spor og papirretning.
+- Detaljerne (beskrivelse, ønsket resultat, statuslog og arbejdsgruppe) står samlet i handlingens egen række. På liggende A4 står de som kolonner, på stående A4 lige under handlingen.
 - »Vis rapport« viser A4-siderne. »Gem som PDF« åbner browserens udskriftsvindue, hvor du vælger »Gem som PDF«.
 - Rapporten har hvid baggrund og kun små farvemarkeringer for at spare blæk. Tal og grafer beregnes på de handlinger, der er med.
 

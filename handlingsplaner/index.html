@@ -285,6 +285,7 @@ button { font: inherit; color: inherit; }
 .rp-bar-title { font-weight: 600; color: var(--deep); font-size: 0.9375rem; text-align: center; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rp-bar .ap-link-btn { font-size: 0.9375rem; text-decoration: none; color: var(--heritage); font-weight: 600; }
 .rp-paper { width: 210mm; max-width: calc(100% - 24px); margin: 24px auto 48px; background: #fff; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12); padding: 16mm 15mm; box-sizing: border-box; }
+.rp-paper.is-land { width: 297mm; padding: 12mm; }
 
 /* ---------- Rapport: indhold (hvid baggrund, sparsom farve) ---------- */
 .rp { font-family: var(--font); color: #22161A; font-size: 9.5pt; line-height: 1.45; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -327,6 +328,23 @@ button { font: inherit; color: inherit; }
 .rp td.num, .rp th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .rp td.late { color: var(--heritage); font-weight: 600; }
 .rp-list { table-layout: fixed; }
+.rp-list tbody { break-inside: avoid; page-break-inside: avoid; }
+.rp-list tbody.is-long { break-inside: auto; page-break-inside: auto; }
+.rp-nm b { font-weight: 600; display: block; }
+.rp-trk { display: flex; align-items: center; gap: 4pt; font-size: 7.5pt; color: #74676B; margin-top: 2pt; }
+.rp-trk i { width: 5.5pt; height: 5.5pt; border-radius: 50%; flex: none; }
+.rp-list td.num .rp-mini { display: block; width: 100%; margin: 3pt 0 0; }
+.rp-late { display: block; font-size: 7pt; font-weight: 600; }
+.rp-grp { display: block; margin-top: 4pt; font-size: 7.5pt; color: #74676B; white-space: pre-wrap; }
+.rp-grp span { display: block; font-weight: 600; color: var(--deep); }
+.rp-txt { white-space: pre-wrap; font-size: 8pt; line-height: 1.4; }
+.rp-txt.log { font-variant-numeric: tabular-nums; }
+.rp-list.is-wide td { padding: 6pt 5pt; }
+.rp-list tr.rp-main td { border-bottom: 0; padding-bottom: 2pt; }
+.rp-detrow td { padding-top: 2pt; padding-bottom: 8pt; }
+.rp-det3 { display: grid; grid-template-columns: 1fr 1fr 1.1fr; gap: 10pt; }
+.rp-det3 .rp-field { margin: 0; }
+.rp-det3 .rp-field p { font-size: 8pt; line-height: 1.4; }
 .rp-mx td.num b { font-weight: 600; }
 .rp-mx td.num small { color: #74676B; font-size: 7pt; margin-left: 2pt; }
 .rp-mx td.tot, .rp-mx tr.tot td { font-weight: 600; }
@@ -352,7 +370,6 @@ button { font: inherit; color: inherit; }
 .rp-field.log p { border-left: 1.5pt solid #E2CDBB; padding-left: 6pt; font-variant-numeric: tabular-nums; }
 .rp-end { margin-top: 16pt; font-size: 7.5pt; color: #74676B; }
 
-@page { size: A4; margin: 14mm 14mm 16mm; }
 @page {
   @bottom-left { content: "DSGN Action Plans"; font-family: Aptos, Arial, sans-serif; font-size: 7.5pt; color: #74676B; }
   @bottom-right { content: "Side " counter(page) " af " counter(pages); font-family: Aptos, Arial, sans-serif; font-size: 7.5pt; color: #74676B; }
@@ -362,7 +379,7 @@ button { font: inherit; color: inherit; }
   body > *:not(#rp-view) { display: none !important; }
   #rp-view { display: block !important; position: static; overflow: visible; background: #fff; }
   .rp-bar { display: none !important; }
-  .rp-paper { width: auto; max-width: none; margin: 0; padding: 0; box-shadow: none; }
+  .rp-paper, .rp-paper.is-land { width: auto; max-width: none; margin: 0; padding: 0; box-shadow: none; }
 }
 </style>
 </head>
@@ -514,11 +531,12 @@ button { font: inherit; color: inherit; }
     <div class="ap-rp-field"><span>Indhold</span>
       <div class="ap-rp-toggles">
         <label class="ap-rp-toggle"><div>Overblik<small>Nøgletal, fremdrift pr. spor, status pr. afdeling og matrix</small></div><input type="checkbox" class="ap-switch" id="rp-ov" checked></label>
-        <label class="ap-rp-toggle"><div>Handlingsliste<small>Én linje pr. handling i samme rækkefølge som tabellen</small></div><input type="checkbox" class="ap-switch" id="rp-list" checked></label>
-        <label class="ap-rp-toggle"><div>Detaljer for hver handling<small>Beskrivelse, ønsket resultat, statuslog og arbejdsgruppe</small></div><input type="checkbox" class="ap-switch" id="rp-det" checked></label>
+        <label class="ap-rp-toggle"><div>Handlinger<small>Én række pr. handling i samme rækkefølge som tabellen</small></div><input type="checkbox" class="ap-switch" id="rp-list" checked></label>
+        <label class="ap-rp-toggle"><div>Detaljer ved hver handling<small>Beskrivelse, ønsket resultat, statuslog og arbejdsgruppe står i handlingens række</small></div><input type="checkbox" class="ap-switch" id="rp-det" checked></label>
       </div>
     </div>
     <div class="ap-rp-field"><span>Gruppér handlinger efter</span><div class="ap-seg" id="rp-group" role="group" aria-label="Gruppér efter"></div></div>
+    <div class="ap-rp-field"><span>Papir</span><div class="ap-seg" id="rp-orient" role="group" aria-label="Papirretning"></div></div>
     <div class="ap-rp-foot">
       <button class="ap-btn ap-btn-ghost" type="button" id="rp-cancel">Annuller</button>
       <button class="ap-btn" type="button" id="rp-show">Vis rapport</button>
@@ -1050,7 +1068,7 @@ button { font: inherit; color: inherit; }
   /* ---------- Rapport ---------- */
   const SORT_LABELS = { Afdeling: 'afdeling', Handling: 'handling', Spor: 'spor', Fremdrift: 'fremdrift', Deadline: 'deadline', Initialer: 'ansvarlig' };
   const STATUS_LABELS = { Alle: 'alle', Færdig: 'færdige', 'I gang': 'i gang', 'Ikke påbegyndt': 'ikke påbegyndt', Forsinket: 'forsinkede' };
-  const rp = { group: 'Ingen' };
+  const rp = { group: 'Ingen', orient: 'Liggende' };
   let quickPrint = false;
 
   function filterParts() {
@@ -1072,17 +1090,77 @@ button { font: inherit; color: inherit; }
     lead.append(document.createTextNode('Rapporten følger dine filtre og din sortering i dashboardet. '), el('strong', '', `${fmtN(shown.length)} ${shown.length === 1 ? 'handling' : 'handlinger'}`), document.createTextNode(' kommer med.'));
     scope.replaceChildren(lead, ul);
     seg($('#rp-group'), ['Ingen', 'Afdeling', 'Spor'], rp.group, (d) => d, (d) => { rp.group = d; openReportDialog(); });
+    seg($('#rp-orient'), ['Liggende', 'Stående'], rp.orient, (d) => `A4 ${d.toLowerCase()}`, (d) => { rp.orient = d; openReportDialog(); });
     $('#rp-show').disabled = !shown.length;
     if (!$('#report-dlg').open) $('#report-dlg').showModal();
   }
 
-  const opts = () => ({ title: $('#rp-title').value.trim(), ov: $('#rp-ov').checked, list: $('#rp-list').checked, det: $('#rp-det').checked, group: rp.group });
+  const opts = () => ({ title: $('#rp-title').value.trim(), ov: $('#rp-ov').checked, list: $('#rp-list').checked, det: $('#rp-det').checked, group: rp.group, land: rp.orient === 'Liggende' });
 
   function groupList(list, by) {
     if (by === 'Ingen') return [{ name: null, items: list }];
     const key = by === 'Afdeling' ? 'Afdeling' : 'Spor';
     const names = sortIn([...new Set(list.map((a) => a[key]))], by === 'Afdeling' ? DEPT_ORDER : TRACK_ORDER);
     return names.map((name) => ({ name, items: list.filter((a) => a[key] === name) }));
+  }
+
+  // Én tabel hvor hver handling og dens detaljer står samlet
+  function actionTable(items, o) {
+    const T = (t) => document.createTextNode(t);
+    const wide = o.det && o.land;
+    const tb = el('table', `rp-list${o.det ? ' has-det' : ''}${wide ? ' is-wide' : ''}`);
+    const cols = wide
+      ? [['Afd.', '', '5%'], ['Handling', '', '16%'], ['Fremdrift', 'num', '7%'], ['Deadline', '', '7%'], ['Ansvarlig', '', '10%'], ['Beskrivelse', '', '17%'], ['Ønsket resultat', '', '18%'], ['Statuslog', '', '20%']]
+      : [['Afd.', '', '8%'], ['Handling', '', o.det ? '40%' : '44%'], ['Spor', '', o.det ? '17%' : '19%'], ['Fremdrift', 'num', '10%'], ['Deadline', '', '11%'], ['Ansvarlig', '', o.det ? '14%' : '8%']];
+    const cg = el('colgroup');
+    cols.forEach(([, , w]) => { const c = el('col'); c.style.width = w; cg.append(c); });
+    const hr = el('tr');
+    cols.forEach(([h, c]) => hr.append(el('th', c, h)));
+    const thead = el('thead'); thead.append(hr);
+    tb.append(cg, thead);
+
+    const nameCell = (a, withTrack) => {
+      const td = el('td', 'rp-nm');
+      td.append(el('b', '', a.Handling || '–'));
+      if (withTrack) { const t = el('span', 'rp-trk'); const i = el('i'); i.style.background = trackColor(a.Spor); t.append(i, T(a.Spor)); td.append(t); }
+      return td;
+    };
+    const progCell = (a) => { const td = el('td', 'num'); const mini = el('span', 'rp-mini'); const mi = el('i', a.Fremdrift === 100 ? 'done' : ''); mi.style.width = `${a.Fremdrift}%`; mini.append(mi); td.append(T(`${a.Fremdrift} %`), mini); return td; };
+    const dlCell = (a) => { const td = el('td', a.Forsinket ? 'late' : '', a.Deadline || '–'); if (a.Forsinket) td.append(el('small', 'rp-late', 'forsinket')); return td; };
+    const respCell = (a, full) => {
+      const td = el('td');
+      td.append(T(full ? (a.Ansvarlig || '–') : (a.Initialer || '–')));
+      if (full && a.Arbejdsgruppe) { const g = el('small', 'rp-grp'); g.append(el('span', '', 'Arbejdsgruppe'), T(a.Arbejdsgruppe)); td.append(g); }
+      return td;
+    };
+    const txt = (v, cls) => el('td', `rp-txt ${cls || ''}`, v || '–');
+
+    items.forEach((a) => {
+      const body = el('tbody');
+      const long = (a.Beskrivelse + a.Resultat + a.Statuslog).length > (wide ? 1600 : 900);
+      if (long) body.classList.add('is-long');
+      if (wide) {
+        const tr = el('tr');
+        tr.append(el('td', '', a.Afdeling), nameCell(a, true), progCell(a), dlCell(a), respCell(a, true), txt(a.Beskrivelse), txt(a.Resultat), txt(a.Statuslog, 'log'));
+        body.append(tr);
+      } else {
+        const tr = el('tr', o.det ? 'rp-main' : '');
+        tr.append(el('td', '', a.Afdeling), nameCell(a, false), el('td', '', a.Spor), progCell(a), dlCell(a), respCell(a, o.det));
+        body.append(tr);
+        if (o.det) {
+          const dr = el('tr', 'rp-detrow');
+          dr.append(el('td'));
+          const td = el('td'); td.colSpan = 5;
+          const grid = el('div', 'rp-det3');
+          [['Beskrivelse', a.Beskrivelse, ''], ['Ønsket resultat', a.Resultat, ''], ['Statuslog', a.Statuslog, 'log']].forEach(([l, v, c]) => {
+            const f = el('div', `rp-field ${c}`); f.append(el('span', '', l), el('p', '', v || '–')); grid.append(f);
+          });
+          td.append(grid); dr.append(td); body.append(dr);
+        }
+      }
+      tb.append(body);
+    });
+    return tb;
   }
 
   function buildReport(o) {
@@ -1178,63 +1256,21 @@ button { font: inherit; color: inherit; }
     const groups = groupList(list, o.group);
     const groupHead = (g) => { const h = el('div', 'rp-group', g.name); h.append(el('small', '', `${g.items.length} ${g.items.length === 1 ? 'handling' : 'handlinger'}, ${fmtPct(stats(g.items).avg)} i snit`)); return h; };
 
-    // Handlingsliste
+    // Handlinger med detaljer samlet pr. handling
     if (o.list) {
       nodes.push(el('h2', '', 'Handlinger'));
       groups.forEach((g) => {
         if (g.name) nodes.push(groupHead(g));
-        const tb = el('table', 'rp-list');
-        const cg = el('colgroup');
-        ['9%', '44%', '19%', '10%', '10%', '8%'].forEach((w) => { const c = el('col'); c.style.width = w; cg.append(c); });
-        tb.append(cg);
-        const hr = el('tr');
-        [['Afd.', ''], ['Handling', ''], ['Spor', ''], ['Fremdrift', 'num'], ['Deadline', ''], ['Ansvarlig', '']].forEach(([h, c]) => hr.append(el('th', c, h)));
-        const thead = el('thead'); thead.append(hr);
-        const tbody = el('tbody');
-        g.items.forEach((a) => {
-          const tr = el('tr');
-          tr.append(el('td', '', a.Afdeling), el('td', '', a.Handling || '–'), el('td', '', a.Spor), el('td', 'num', `${a.Fremdrift} %`),
-            el('td', a.Forsinket ? 'late' : '', a.Deadline || '–'), el('td', '', a.Initialer || '–'));
-          tbody.append(tr);
-        });
-        tb.append(thead, tbody);
-        nodes.push(tb);
-      });
-    }
-
-    // Detaljer
-    if (o.det) {
-      nodes.push(el('h2', '', 'Detaljer for hver handling'));
-      groups.forEach((g) => {
-        if (g.name) nodes.push(groupHead(g));
-        g.items.forEach((a) => {
-          const it = el('section', 'rp-item');
-          const textLen = (a.Beskrivelse + a.Resultat + a.Statuslog).length;
-          if (textLen > 450) it.classList.add('is-long');
-          const tag = el('div', 'rp-item-tag'); const dot = el('i'); dot.style.background = trackColor(a.Spor);
-          tag.append(T(`${a.Afdeling}`), dot, T(a.Spor));
-          it.append(tag, el('h3', '', a.Handling || '–'));
-          const facts = el('div', 'rp-facts');
-          const fact = (label, node) => { const d = el('div'); d.append(el('span', '', label), node); return d; };
-          const prog = el('b'); const mini = el('span', 'rp-mini'); const mi = el('i', a.Fremdrift === 100 ? 'done' : ''); mi.style.width = `${a.Fremdrift}%`; mini.append(mi); prog.append(mini, T(`${a.Fremdrift} %`));
-          facts.append(
-            fact('Fremdrift', prog),
-            fact('Deadline', el('b', a.Forsinket ? 'late' : '', a.Forsinket ? `${a.Deadline}, forsinket` : (a.Deadline || '–'))),
-            fact('Ansvarlig', el('b', '', a.Ansvarlig || '–')),
-            fact('Status', el('b', '', a.Status)),
-          );
-          it.append(facts);
-          [['Beskrivelse', a.Beskrivelse, ''], ['Ønsket resultat', a.Resultat, ''], ['Statuslog', a.Statuslog, 'log'], ['Arbejdsgruppe', a.Arbejdsgruppe, '']].forEach(([l, v, c]) => {
-            if (!v) return;
-            const f = el('div', `rp-field ${c}`); f.append(el('span', '', l), el('p', '', v)); it.append(f);
-          });
-          nodes.push(it);
-        });
+        nodes.push(actionTable(g.items, o));
       });
     }
 
     nodes.push(el('p', 'rp-end', 'Forsinket betyder, at deadline-kvartalet er passeret, og handlingen ikke står til 100 %. »Ongoing« tæller aldrig som forsinket. Tal og grafer er beregnet på de handlinger, der er med i rapporten.'));
     R.replaceChildren(...nodes);
+    let ps = document.getElementById('rp-page');
+    if (!ps) { ps = document.createElement('style'); ps.id = 'rp-page'; document.head.append(ps); }
+    ps.textContent = `@page { size: A4 ${o.land ? 'landscape' : 'portrait'}; margin: ${o.land ? '11mm 12mm 13mm' : '14mm 14mm 16mm'}; }`;
+    document.querySelector('.rp-paper').classList.toggle('is-land', o.land);
     $('#rp-bar-title').textContent = o.title ? `DSGN Action Plans, ${o.title}` : 'DSGN Action Plans';
   }
 

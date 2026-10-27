@@ -22,6 +22,13 @@ Dashboard over handlingsplanerne i Buildings Design East (DSGN) i NIRAS CVI.
 - »Vis rapport« viser A4-siderne. »Gem som PDF« åbner browserens udskriftsvindue, hvor du vælger »Gem som PDF«.
 - Rapporten har hvid baggrund og kun små farvemarkeringer for at spare blæk. Tal og grafer beregnes på de handlinger, der er med.
 
+## Del dashboardet som fil
+
+- Klik på »Eksportér« og »Hent HTML-fil«. Du får én HTML-fil med dashboardet og CSV'ens data indlejret, fx `DSGN_Action_Plans_2026-10-27.html`.
+- Modtageren åbner filen i sin browser og ser dashboardet med det samme, uden upload og uden internet. Rapport og eksport virker også i den delte fil.
+- Slå »Åbn med mine filtre og min sortering« til, hvis filen skal åbne med dit udvalg.
+- Filen indeholder alle data fra CSV'en, også dem filtrene skjuler. Send den kun til kolleger, der må se dem, og læg den aldrig i dette repo.
+
 ## Filformat
 
 CSV med komma, semikolon eller tabulator som skilletegn. Første række er kolonnenavnene fra SharePoint-eksporten. Påkrævet: `Department`, `Strategic track`, `Action name`, `Completion`. Brugt hvis de findes: `Description`, `Result`, `Status log`, `Responsible`, `Working group`, `Deadline [quarter]` (fx `2026Q2` eller `Ongoing`) og `Link to plan`.

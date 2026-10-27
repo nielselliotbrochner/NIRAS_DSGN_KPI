@@ -80,6 +80,13 @@ button { font: inherit; color: inherit; }
 .ap-chip[aria-pressed="true"] { background: var(--deep); color: #fff; }
 .ap-chip .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
 .ap-chip[aria-pressed="true"] .dot { box-shadow: 0 0 0 1.5px #fff; }
+.ap-select { position: relative; display: inline-flex; align-items: center; color: var(--fg); }
+.ap-select select { appearance: none; -webkit-appearance: none; border: 0; cursor: pointer; background: var(--fill); border-radius: 999px; padding: 6px 30px 6px 12px; font: inherit; font-size: 0.8125rem; font-weight: 500; color: inherit; max-width: 280px; text-overflow: ellipsis; transition: background .2s, color .2s; }
+.ap-select select:hover { background: var(--fill-strong); }
+.ap-select.is-on { color: #fff; }
+.ap-select.is-on select { background: var(--deep); }
+.ap-select select option { color: var(--fg); background: #fff; }
+.ap-select svg { position: absolute; right: 12px; top: 50%; width: 10px; height: 6px; transform: translateY(-50%); pointer-events: none; }
 .ap-reset { margin-left: auto; border: 0; background: none; cursor: pointer; color: var(--heritage); font-size: 0.875rem; font-weight: 600; padding: 6px 4px; }
 
 /* KPI strip */
@@ -430,6 +437,10 @@ button { font: inherit; color: inherit; }
     <nav class="ap-bar" aria-label="Filtre">
       <div class="ap-seg" id="f-afd" role="group" aria-label="Afdeling"></div>
       <div class="ap-chips" id="f-spor" role="group" aria-label="Strategisk spor"></div>
+      <label class="ap-select" id="f-ansv-wrap">
+        <select id="f-ansv" aria-label="Ansvarlig"></select>
+        <svg viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg>
+      </label>
       <button class="ap-reset" id="f-reset" type="button" hidden>Nulstil filtre</button>
     </nav>
 
@@ -708,7 +719,8 @@ button { font: inherit; color: inherit; }
   /* ---------- State ---------- */
   let actions = [];
   let afds = [], spors = [];
-  const state = { afd: 'Alle', spor: 'Alle', status: 'Alle', q: '' };
+  const state = { afd: 'Alle', spor: 'Alle', ansv: 'Alle', status: 'Alle', q: '' };
+  let ansvs = [];
   let sortKey = null, sortDir = 1;
   let shown = [];
   let current = null;
@@ -739,6 +751,8 @@ button { font: inherit; color: inherit; }
     spors = sortIn([...new Set(actions.map((a) => a.Spor))], TRACK_ORDER);
     if (!afds.includes(state.afd)) state.afd = 'Alle';
     if (!spors.includes(state.spor)) state.spor = 'Alle';
+    ansvs = [...new Set(actions.map((a) => a.Ansvarlig).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'da'));
+    if (!ansvs.includes(state.ansv)) state.ansv = 'Alle';
     $('#welcome').hidden = true;
     $('#dash').hidden = false;
     $('#actions').hidden = false;
@@ -815,7 +829,7 @@ button { font: inherit; color: inherit; }
 
   /* ---------- Filtre ---------- */
   function setState(patch) { Object.assign(state, patch); render(); }
-  const filterBy = (afd, spor) => actions.filter((a) => (afd === 'Alle' || a.Afdeling === afd) && (spor === 'Alle' || a.Spor === spor));
+  const filterBy = (afd, spor) => actions.filter((a) => (afd === 'Alle' || a.Afdeling === afd) && (spor === 'Alle' || a.Spor === spor) && (state.ansv === 'Alle' || a.Ansvarlig === state.ansv));
 
   function seg(container, items, active, label, onPick) {
     container.replaceChildren(...items.map((d) => {
@@ -836,15 +850,21 @@ button { font: inherit; color: inherit; }
       b.addEventListener('click', () => setState({ spor: d }));
       return b;
     }));
+    const sel = $('#f-ansv');
+    const ansvCount = (n) => actions.filter((a) => a.Ansvarlig === n).length;
+    sel.replaceChildren(new Option('Alle ansvarlige', 'Alle'), ...ansvs.map((n) => new Option(`${n}, ${ansvCount(n)}`, n)));
+    sel.value = state.ansv;
+    $('#f-ansv-wrap').classList.toggle('is-on', state.ansv !== 'Alle');
     seg($('#f-status'), STATUSES, state.status, (d) => ({ Alle: 'Alle', Færdig: 'Færdige', Forsinket: 'Forsinkede' }[d] || d), (d) => setState({ status: d }));
-    $('#f-reset').hidden = state.afd === 'Alle' && state.spor === 'Alle' && state.status === 'Alle' && !state.q;
+    $('#f-reset').hidden = state.afd === 'Alle' && state.spor === 'Alle' && state.ansv === 'Alle' && state.status === 'Alle' && !state.q;
     document.querySelectorAll('.ap-kpi[data-status]').forEach((b) => {
       const s = b.dataset.status;
       b.setAttribute('aria-pressed', String(s !== 'Alle' && s === state.status));
     });
   }
 
-  const resetAll = () => { $('#q').value = ''; setState({ afd: 'Alle', spor: 'Alle', status: 'Alle', q: '' }); };
+  const resetAll = () => { $('#q').value = ''; setState({ afd: 'Alle', spor: 'Alle', ansv: 'Alle', status: 'Alle', q: '' }); };
+  $('#f-ansv').addEventListener('change', (ev) => setState({ ansv: ev.target.value }));
   $('#f-reset').addEventListener('click', resetAll);
   $('#empty-reset').addEventListener('click', resetAll);
   document.querySelectorAll('.ap-kpi[data-status]').forEach((b) => b.addEventListener('click', () => {
@@ -859,12 +879,13 @@ button { font: inherit; color: inherit; }
       const k = e.dataset.k;
       e.textContent = k === 'avg' ? fmtPct(s.avg) : fmtN(s[k]);
     });
-    const scope = [state.afd !== 'Alle' ? state.afd : null, state.spor !== 'Alle' ? state.spor : null].filter(Boolean);
+    const where = [state.afd !== 'Alle' ? state.afd : null, state.spor !== 'Alle' ? state.spor : null].filter(Boolean).join(' inden for ');
+    const scope = [where || null, state.ansv !== 'Alle' ? `ansvarlig ${state.ansv}` : null].filter(Boolean);
     const p = $('#takeaway');
     const b = (t) => el('b', '', t);
     const T = (t) => document.createTextNode(t);
     p.replaceChildren(
-      T(scope.length ? `${scope.join(' inden for ')}: ` : ''),
+      T(scope.length ? `${scope.join(', ').replace(/^./, (c) => c.toUpperCase())}: ` : ''),
       b(fmtN(s.n)), T(' handlinger med en gennemsnitlig fremdrift på '), b(fmtPct(s.avg)), T('. '),
       b(fmtN(s.done)), T(' er færdige, '), b(fmtN(s.todo)), T(' er ikke påbegyndt, og '),
       b(fmtN(s.late)), T(s.late === 1 ? ' har passeret deadline uden at være færdig.' : ' har passeret deadline uden at være færdige.'),
@@ -1020,6 +1041,7 @@ button { font: inherit; color: inherit; }
     const list = actions.filter((a) => {
       if (state.afd !== 'Alle' && a.Afdeling !== state.afd) return false;
       if (state.spor !== 'Alle' && a.Spor !== state.spor) return false;
+      if (state.ansv !== 'Alle' && a.Ansvarlig !== state.ansv) return false;
       if (state.status === 'Forsinket' && !a.Forsinket) return false;
       if (state.status !== 'Alle' && state.status !== 'Forsinket' && a.Status !== state.status) return false;
       if (needle) {
@@ -1112,6 +1134,7 @@ button { font: inherit; color: inherit; }
     return [
       ['Afdeling', state.afd === 'Alle' ? 'alle' : state.afd],
       ['Spor', state.spor === 'Alle' ? 'alle' : state.spor],
+      ['Ansvarlig', state.ansv === 'Alle' ? 'alle' : state.ansv],
       ['Status', STATUS_LABELS[state.status] || state.status],
       ['Søgning', state.q.trim() ? `»${state.q.trim()}«` : 'ingen'],
       ['Sortering', sortKey ? `${SORT_LABELS[sortKey]}, ${sortDir > 0 ? 'stigende' : 'faldende'}` : 'som i SharePoint-listen'],
@@ -1377,7 +1400,7 @@ button { font: inherit; color: inherit; }
       at: currentData.at,
       exportedAt: now.toISOString(),
       text: currentData.text,
-      view: $('#ex-keep').checked ? { afd: state.afd, spor: state.spor, status: state.status, q: state.q, sortKey, sortDir } : null,
+      view: $('#ex-keep').checked ? { afd: state.afd, spor: state.spor, ansv: state.ansv, status: state.status, q: state.q, sortKey, sortDir } : null,
     };
     // Escape så data aldrig kan lukke script-tagget
     const json = JSON.stringify(payload).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
@@ -1421,7 +1444,7 @@ button { font: inherit; color: inherit; }
   if (embedded && embedded.text) {
     if (embedded.view) {
       const v = embedded.view;
-      Object.assign(state, { afd: v.afd || 'Alle', spor: v.spor || 'Alle', status: STATUSES.includes(v.status) ? v.status : 'Alle', q: v.q || '' });
+      Object.assign(state, { afd: v.afd || 'Alle', spor: v.spor || 'Alle', ansv: v.ansv || 'Alle', status: STATUSES.includes(v.status) ? v.status : 'Alle', q: v.q || '' });
       $('#q').value = state.q;
       if (v.sortKey && SORT_LABELS[v.sortKey]) { sortKey = v.sortKey; sortDir = v.sortDir === -1 ? -1 : 1; }
     }

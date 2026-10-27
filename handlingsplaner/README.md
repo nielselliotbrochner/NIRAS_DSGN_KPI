@@ -9,6 +9,7 @@ Dashboard over handlingsplanerne i Buildings Design East (DSGN) i NIRAS CVI.
 
 ## Hvad siden viser
 
+- Filtre på afdeling, strategisk spor og ansvarlig. Alle tal, grafer, tabellen, rapporten og eksporten følger dem.
 - Nøgletal: antal handlinger, gennemsnitlig fremdrift, færdige, ikke påbegyndt og forsinkede.
 - Fremdrift pr. strategisk spor (ringe), status pr. afdeling og en matrix over afdeling og spor.
 - En tabel med søgning, sortering og filter på status. Klik på en handling for beskrivelse, ønsket resultat, statuslog og arbejdsgruppe.

@@ -257,10 +257,112 @@ button { font: inherit; color: inherit; }
   .ap-actions { align-items: flex-start; }
   .ap-meta { text-align: left; }
 }
+/* ---------- Rapport: knap og indstillinger ---------- */
+.ap-btn-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.ap-btn-ghost { background: var(--panel); color: var(--deep); box-shadow: inset 0 0 0 1.5px var(--sand-dark); }
+.ap-btn-ghost:hover { background: var(--fill); }
+.ap-rp-dlg { width: min(560px, calc(100vw - 32px)); }
+.ap-rp-scope { background: var(--fill); border-radius: 14px; padding: 14px 16px; margin: 0 0 20px; font-size: 0.9rem; line-height: 1.55; }
+.ap-rp-scope strong { color: var(--deep); }
+.ap-rp-scope ul { margin: 6px 0 0; padding-left: 18px; }
+.ap-rp-field { display: block; margin-bottom: 18px; }
+.ap-rp-field > span { display: block; font-size: 0.875rem; font-weight: 600; color: var(--deep); margin-bottom: 6px; }
+.ap-rp-field input[type="text"] { width: 100%; border: 0; border-radius: 10px; background: var(--fill); padding: 10px 12px; font: inherit; font-size: 0.9375rem; color: var(--fg); }
+.ap-rp-toggles { display: flex; flex-direction: column; gap: 2px; margin-bottom: 18px; }
+.ap-rp-toggle { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--hair); cursor: pointer; font-size: 0.9375rem; }
+.ap-rp-toggle:last-child { border-bottom: 0; }
+.ap-rp-toggle small { display: block; color: var(--muted); font-size: 0.8125rem; margin-top: 2px; }
+.ap-switch { appearance: none; -webkit-appearance: none; flex: none; width: 44px; height: 26px; border-radius: 13px; background: var(--sand-dark); position: relative; cursor: pointer; transition: background .2s; margin: 0; }
+.ap-switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); transition: transform .2s; }
+.ap-switch:checked { background: var(--heritage); }
+.ap-switch:checked::after { transform: translateX(18px); }
+.ap-rp-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 22px; }
+.ap-rp-foot .ap-btn:disabled { opacity: .45; cursor: default; }
+
+/* ---------- Rapport: forhåndsvisning ---------- */
+.rp-view { position: fixed; inset: 0; z-index: 60; background: #E8E2DC; overflow: auto; }
+.rp-bar { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px clamp(16px, 4vw, 32px); background: rgba(255, 255, 255, 0.86); backdrop-filter: saturate(180%) blur(18px); -webkit-backdrop-filter: saturate(180%) blur(18px); border-bottom: 1px solid var(--hair); font-family: var(--font); }
+.rp-bar-title { font-weight: 600; color: var(--deep); font-size: 0.9375rem; text-align: center; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rp-bar .ap-link-btn { font-size: 0.9375rem; text-decoration: none; color: var(--heritage); font-weight: 600; }
+.rp-paper { width: 210mm; max-width: calc(100% - 24px); margin: 24px auto 48px; background: #fff; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12); padding: 16mm 15mm; box-sizing: border-box; }
+
+/* ---------- Rapport: indhold (hvid baggrund, sparsom farve) ---------- */
+.rp { font-family: var(--font); color: #22161A; font-size: 9.5pt; line-height: 1.45; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.rp * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.rp-brand { display: flex; align-items: center; gap: 6px; font-size: 8.5pt; font-weight: 600; color: var(--deep); margin-bottom: 8pt; }
+.rp-brand i { width: 7px; height: 7px; border-radius: 50%; background: var(--heritage); }
+.rp h1 { font-family: var(--serif); font-size: 24pt; font-weight: 600; color: var(--deep); margin: 0; line-height: 1.05; letter-spacing: -0.01em; }
+.rp-sub { font-family: var(--serif); font-size: 13pt; color: #22161A; margin: 4pt 0 10pt; }
+.rp-meta { font-size: 8.5pt; color: #74676B; margin: 0 0 4pt; }
+.rp-filters { font-size: 8.5pt; color: #74676B; margin: 0 0 14pt; padding-bottom: 10pt; border-bottom: 1.5pt solid var(--heritage); }
+.rp-filters b { color: #22161A; font-weight: 600; }
+.rp-lede { font-size: 11pt; line-height: 1.5; margin: 0 0 14pt; color: #3A2C30; }
+.rp-lede b { color: #22161A; }
+.rp-kpis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6pt; margin-bottom: 16pt; }
+.rp-kpi { border: 0.75pt solid #E2CDBB; border-radius: 6pt; padding: 7pt 8pt; }
+.rp-kpi span { display: block; font-size: 7.5pt; color: #74676B; }
+.rp-kpi b { display: block; font-family: var(--serif); font-size: 17pt; font-weight: 600; line-height: 1.1; margin-top: 2pt; font-variant-numeric: tabular-nums; }
+.rp-kpi.is-done b { color: var(--deep); }
+.rp-kpi.is-late b { color: var(--heritage); }
+.rp h2 { font-family: var(--serif); font-size: 13pt; font-weight: 600; color: var(--deep); margin: 16pt 0 6pt; break-after: avoid; page-break-after: avoid; }
+.rp-note { font-size: 8pt; color: #74676B; margin: -2pt 0 8pt; }
+.rp-two { display: grid; grid-template-columns: 1fr 1fr; gap: 16pt; }
+.rp-two > div { break-inside: avoid; page-break-inside: avoid; }
+.rp-bars { display: flex; flex-direction: column; gap: 5pt; }
+.rp-bar-row { display: grid; grid-template-columns: 30mm 1fr 11mm; align-items: center; gap: 6pt; font-size: 8.5pt; }
+.rp-bar-row .nm { display: flex; align-items: center; gap: 5pt; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rp-bar-row .nm i { width: 6pt; height: 6pt; border-radius: 50%; flex: none; }
+.rp-bar-row .val { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+.rp-track { height: 5pt; border-radius: 3pt; background: #F2E2D5; overflow: hidden; display: flex; gap: 1pt; }
+.rp-track span { height: 100%; display: block; }
+.rp-bar-row .cap { grid-column: 2 / 4; font-size: 7.5pt; color: #74676B; margin-top: -3pt; }
+.rp-keys { display: flex; gap: 10pt; font-size: 7.5pt; color: #74676B; margin-top: 6pt; }
+.rp-keys span { display: inline-flex; align-items: center; gap: 4pt; }
+.rp-keys i { width: 7pt; height: 7pt; border-radius: 2pt; display: inline-block; }
+.rp table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
+.rp th { text-align: left; font-weight: 600; color: #74676B; font-size: 7.5pt; padding: 4pt 5pt; border-bottom: 0.75pt solid #22161A; }
+.rp td { padding: 4.5pt 5pt; border-bottom: 0.5pt solid #E2CDBB; vertical-align: top; }
+.rp tr { break-inside: avoid; page-break-inside: avoid; }
+.rp thead { display: table-header-group; }
+.rp td.num, .rp th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rp td.late { color: var(--heritage); font-weight: 600; }
+.rp-list { table-layout: fixed; }
+.rp-mx td.num b { font-weight: 600; }
+.rp-mx td.num small { color: #74676B; font-size: 7pt; margin-left: 2pt; }
+.rp-mx td.tot, .rp-mx tr.tot td { font-weight: 600; }
+.rp-mx tr.tot td { border-top: 0.75pt solid #22161A; }
+.rp-mx td.hi b { color: var(--deep); }
+.rp-group { font-family: var(--serif); font-size: 12pt; font-weight: 600; color: var(--deep); margin: 14pt 0 4pt; padding-bottom: 3pt; border-bottom: 0.75pt solid #E2CDBB; break-after: avoid; page-break-after: avoid; }
+.rp-group small { font-family: var(--font); font-size: 8pt; color: #74676B; font-weight: 400; margin-left: 6pt; }
+.rp-item { padding: 9pt 0 10pt; border-bottom: 0.5pt solid #E2CDBB; break-inside: avoid; page-break-inside: avoid; }
+.rp-item.is-long { break-inside: auto; page-break-inside: auto; }
+.rp-item-tag { font-size: 7.5pt; color: #74676B; display: flex; align-items: center; gap: 5pt; }
+.rp-item-tag i { width: 6pt; height: 6pt; border-radius: 50%; }
+.rp-item h3 { font-size: 11pt; font-weight: 700; margin: 2pt 0 5pt; color: #22161A; }
+.rp-facts { display: grid; grid-template-columns: 1.2fr 0.8fr 1.6fr 1fr; gap: 6pt; margin-bottom: 6pt; font-size: 8.5pt; }
+.rp-facts span { display: block; font-size: 7pt; color: #74676B; }
+.rp-facts b { font-weight: 600; }
+.rp-facts .late { color: var(--heritage); }
+.rp-facts .rp-mini, .rp-mini { display: inline-block; width: 18mm; height: 4pt; border-radius: 2pt; background: #F2E2D5; vertical-align: middle; margin-right: 4pt; overflow: hidden; }
+.rp-mini i { display: block; height: 100%; background: var(--heritage); }
+.rp-mini i.done { background: var(--deep); }
+.rp-field { margin-top: 4pt; }
+.rp-field span { display: block; font-size: 7.5pt; font-weight: 600; color: var(--deep); }
+.rp-field p { margin: 1pt 0 0; white-space: pre-wrap; }
+.rp-field.log p { border-left: 1.5pt solid #E2CDBB; padding-left: 6pt; font-variant-numeric: tabular-nums; }
+.rp-end { margin-top: 16pt; font-size: 7.5pt; color: #74676B; }
+
+@page { size: A4; margin: 14mm 14mm 16mm; }
+@page {
+  @bottom-left { content: "DSGN Action Plans"; font-family: Aptos, Arial, sans-serif; font-size: 7.5pt; color: #74676B; }
+  @bottom-right { content: "Side " counter(page) " af " counter(pages); font-family: Aptos, Arial, sans-serif; font-size: 7.5pt; color: #74676B; }
+}
 @media print {
-  .ap-bar, .ap-actions, .ap-tools { display: none !important; }
-  .ap-tbl-wrap { max-height: none; overflow: visible; }
-  body, html { background: #fff; }
+  html, body { background: #fff !important; }
+  body > *:not(#rp-view) { display: none !important; }
+  #rp-view { display: block !important; position: static; overflow: visible; background: #fff; }
+  .rp-bar { display: none !important; }
+  .rp-paper { width: auto; max-width: none; margin: 0; padding: 0; box-shadow: none; }
 }
 </style>
 </head>
@@ -275,10 +377,16 @@ button { font: inherit; color: inherit; }
       <p class="ap-lede" id="takeaway">Indlæs CSV-eksporten fra SharePoint-listen for at se status på handlingsplanerne.</p>
     </header>
     <div class="ap-actions" id="actions" hidden>
-      <button class="ap-btn" type="button" data-pick>
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11V2.5M4.5 6L8 2.5 11.5 6M2.5 10.5v2a1 1 0 001 1h9a1 1 0 001-1v-2"/></svg>
-        Upload ny CSV
-      </button>
+      <div class="ap-btn-row">
+        <button class="ap-btn ap-btn-ghost" type="button" id="report-btn">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 5.5V2h7v3.5M4.5 11.5h-2v-5a1 1 0 011-1h9a1 1 0 011 1v5h-2M4.5 9.5h7V14h-7z"/></svg>
+          Lav rapport
+        </button>
+        <button class="ap-btn" type="button" data-pick>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11V2.5M4.5 6L8 2.5 11.5 6M2.5 10.5v2a1 1 0 001 1h9a1 1 0 001-1v-2"/></svg>
+          Upload ny CSV
+        </button>
+      </div>
       <div class="ap-meta" id="meta"></div>
       <button class="ap-link-btn" type="button" id="forget">Fjern data fra browseren</button>
     </div>
@@ -394,6 +502,41 @@ button { font: inherit; color: inherit; }
     <a class="ap-plan-link" id="d-link" target="_blank" rel="noopener" hidden>Åbn handlingsplanen i SharePoint</a>
   </div>
 </dialog>
+
+<dialog class="ap-sheet ap-rp-dlg" id="report-dlg" aria-labelledby="rp-dlg-title">
+  <div class="ap-sheet-in">
+    <div class="ap-sheet-top">
+      <h2 id="rp-dlg-title" style="margin:0">Lav rapport</h2>
+      <div class="ap-sheet-nav"><button type="button" id="rp-close" aria-label="Luk"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l8 8M11 3l-8 8"/></svg></button></div>
+    </div>
+    <div class="ap-rp-scope" id="rp-scope"></div>
+    <label class="ap-rp-field"><span>Titel</span><input type="text" id="rp-title" value="Statusrapport" maxlength="90"></label>
+    <div class="ap-rp-field"><span>Indhold</span>
+      <div class="ap-rp-toggles">
+        <label class="ap-rp-toggle"><div>Overblik<small>Nøgletal, fremdrift pr. spor, status pr. afdeling og matrix</small></div><input type="checkbox" class="ap-switch" id="rp-ov" checked></label>
+        <label class="ap-rp-toggle"><div>Handlingsliste<small>Én linje pr. handling i samme rækkefølge som tabellen</small></div><input type="checkbox" class="ap-switch" id="rp-list" checked></label>
+        <label class="ap-rp-toggle"><div>Detaljer for hver handling<small>Beskrivelse, ønsket resultat, statuslog og arbejdsgruppe</small></div><input type="checkbox" class="ap-switch" id="rp-det" checked></label>
+      </div>
+    </div>
+    <div class="ap-rp-field"><span>Gruppér handlinger efter</span><div class="ap-seg" id="rp-group" role="group" aria-label="Gruppér efter"></div></div>
+    <div class="ap-rp-foot">
+      <button class="ap-btn ap-btn-ghost" type="button" id="rp-cancel">Annuller</button>
+      <button class="ap-btn" type="button" id="rp-show">Vis rapport</button>
+    </div>
+  </div>
+</dialog>
+
+<div class="rp-view" id="rp-view" hidden>
+  <div class="rp-bar">
+    <button class="ap-link-btn" type="button" id="rp-back">‹ Tilbage</button>
+    <div class="rp-bar-title" id="rp-bar-title">Rapport</div>
+    <button class="ap-btn" type="button" id="rp-print">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5V11M4.5 7.5L8 11l3.5-3.5M2.5 13.5h11"/></svg>
+      Gem som PDF
+    </button>
+  </div>
+  <div class="rp-paper"><article class="rp" id="report"></article></div>
+</div>
 
 <script>
 (() => {
@@ -903,6 +1046,242 @@ button { font: inherit; color: inherit; }
   $('#d-close').addEventListener('click', () => dlg.close());
   dlg.addEventListener('click', (ev) => { if (ev.target === dlg) dlg.close(); });
   dlg.addEventListener('keydown', (ev) => { if (ev.key === 'ArrowLeft') step(-1); if (ev.key === 'ArrowRight') step(1); });
+
+  /* ---------- Rapport ---------- */
+  const SORT_LABELS = { Afdeling: 'afdeling', Handling: 'handling', Spor: 'spor', Fremdrift: 'fremdrift', Deadline: 'deadline', Initialer: 'ansvarlig' };
+  const STATUS_LABELS = { Alle: 'alle', Færdig: 'færdige', 'I gang': 'i gang', 'Ikke påbegyndt': 'ikke påbegyndt', Forsinket: 'forsinkede' };
+  const rp = { group: 'Ingen' };
+  let quickPrint = false;
+
+  function filterParts() {
+    return [
+      ['Afdeling', state.afd === 'Alle' ? 'alle' : state.afd],
+      ['Spor', state.spor === 'Alle' ? 'alle' : state.spor],
+      ['Status', STATUS_LABELS[state.status] || state.status],
+      ['Søgning', state.q.trim() ? `»${state.q.trim()}«` : 'ingen'],
+      ['Sortering', sortKey ? `${SORT_LABELS[sortKey]}, ${sortDir > 0 ? 'stigende' : 'faldende'}` : 'som i SharePoint-listen'],
+    ];
+  }
+
+  function openReportDialog() {
+    drawTable();
+    const scope = $('#rp-scope');
+    const ul = el('ul');
+    filterParts().forEach(([k, v]) => { const li = el('li'); li.append(el('span', '', `${k}: `), el('strong', '', v)); ul.append(li); });
+    const lead = el('div');
+    lead.append(document.createTextNode('Rapporten følger dine filtre og din sortering i dashboardet. '), el('strong', '', `${fmtN(shown.length)} ${shown.length === 1 ? 'handling' : 'handlinger'}`), document.createTextNode(' kommer med.'));
+    scope.replaceChildren(lead, ul);
+    seg($('#rp-group'), ['Ingen', 'Afdeling', 'Spor'], rp.group, (d) => d, (d) => { rp.group = d; openReportDialog(); });
+    $('#rp-show').disabled = !shown.length;
+    if (!$('#report-dlg').open) $('#report-dlg').showModal();
+  }
+
+  const opts = () => ({ title: $('#rp-title').value.trim(), ov: $('#rp-ov').checked, list: $('#rp-list').checked, det: $('#rp-det').checked, group: rp.group });
+
+  function groupList(list, by) {
+    if (by === 'Ingen') return [{ name: null, items: list }];
+    const key = by === 'Afdeling' ? 'Afdeling' : 'Spor';
+    const names = sortIn([...new Set(list.map((a) => a[key]))], by === 'Afdeling' ? DEPT_ORDER : TRACK_ORDER);
+    return names.map((name) => ({ name, items: list.filter((a) => a[key] === name) }));
+  }
+
+  function buildReport(o) {
+    const list = shown.slice();
+    const s = stats(list);
+    const R = $('#report');
+    const T = (t) => document.createTextNode(t);
+    const nodes = [];
+
+    // Hoved
+    const brand = el('div', 'rp-brand'); brand.append(el('i'), T('NIRAS Buildings Design East'));
+    nodes.push(brand, el('h1', '', 'DSGN Action Plans'));
+    if (o.title) nodes.push(el('p', 'rp-sub', o.title));
+    const now = new Date().toISOString();
+    nodes.push(el('p', 'rp-meta', `Udskrevet ${fmtDate(now)}. Datakilde: ${$('#meta').textContent || 'uploadet CSV'}.`));
+    const fl = el('p', 'rp-filters');
+    filterParts().forEach(([k, v]) => { fl.append(T(`${k}: `), el('b', '', v), T('.  ')); });
+    nodes.push(fl);
+    const lede = el('p', 'rp-lede');
+    lede.append(el('b', '', fmtN(s.n)), T(` ${s.n === 1 ? 'handling' : 'handlinger'} med en gennemsnitlig fremdrift på `), el('b', '', fmtPct(s.avg)), T('. '),
+      el('b', '', fmtN(s.done)), T(' er færdige, '), el('b', '', fmtN(s.todo)), T(' er ikke påbegyndt, og '), el('b', '', fmtN(s.late)),
+      T(s.late === 1 ? ' har passeret deadline uden at være færdig.' : ' har passeret deadline uden at være færdige.'));
+    nodes.push(lede);
+
+    // Overblik
+    if (o.ov) {
+      const kp = el('div', 'rp-kpis');
+      [['Handlinger', fmtN(s.n), ''], ['Gns. fremdrift', fmtPct(s.avg), ''], ['Færdige', fmtN(s.done), 'is-done'], ['Ikke påbegyndt', fmtN(s.todo), ''], ['Forsinkede', fmtN(s.late), 'is-late']]
+        .forEach(([l, v, c]) => { const d = el('div', `rp-kpi ${c}`); d.append(el('span', '', l), el('b', '', v)); kp.append(d); });
+      nodes.push(kp);
+
+      const lSpors = sortIn([...new Set(list.map((a) => a.Spor))], TRACK_ORDER);
+      const lAfds = sortIn([...new Set(list.map((a) => a.Afdeling))], DEPT_ORDER);
+      const two = el('div', 'rp-two');
+
+      const c1 = el('div'); c1.append(el('h2', '', 'Fremdrift pr. strategisk spor'));
+      const b1 = el('div', 'rp-bars');
+      lSpors.forEach((t) => {
+        const st = stats(list.filter((a) => a.Spor === t));
+        const row = el('div', 'rp-bar-row');
+        const nm = el('span', 'nm'); const dot = el('i'); dot.style.background = trackColor(t); nm.append(dot, T(t));
+        const tr = el('div', 'rp-track'); const f = el('span'); f.style.width = `${st.avg || 0}%`; f.style.background = trackColor(t); tr.append(f);
+        row.append(nm, tr, el('span', 'val', fmtPct(st.avg)), el('span', 'cap', `${st.n} ${st.n === 1 ? 'handling' : 'handlinger'}, ${st.done} færdige, ${st.late} forsinkede`));
+        b1.append(row);
+      });
+      c1.append(b1);
+
+      const c2 = el('div'); c2.append(el('h2', '', 'Status pr. afdeling'));
+      const b2 = el('div', 'rp-bars');
+      lAfds.forEach((d) => {
+        const st = stats(list.filter((a) => a.Afdeling === d));
+        const row = el('div', 'rp-bar-row');
+        const tr = el('div', 'rp-track');
+        [['done', 'var(--done)'], ['prog', 'var(--prog)'], ['todo', 'var(--todo)']].forEach(([k, col]) => {
+          if (!st[k]) return; const sp = el('span'); sp.style.flexGrow = st[k]; sp.style.flexBasis = 0; sp.style.background = col; tr.append(sp);
+        });
+        row.append(el('span', 'nm', d), tr, el('span', 'val', fmtN(st.n)), el('span', 'cap', `${st.done} færdige, ${st.prog} i gang, ${st.todo} ikke påbegyndt`));
+        b2.append(row);
+      });
+      const keys = el('div', 'rp-keys');
+      [['Færdige', 'var(--done)'], ['I gang', 'var(--prog)'], ['Ikke påbegyndt', 'var(--todo)']].forEach(([l, c]) => { const sp = el('span'); const i = el('i'); i.style.background = c; sp.append(i, T(l)); keys.append(sp); });
+      c2.append(b2, keys);
+      two.append(c1, c2);
+      nodes.push(two);
+
+      if (lAfds.length > 1 || lSpors.length > 1) {
+        nodes.push(el('h2', '', 'Afdeling og spor'), el('p', 'rp-note', 'Gennemsnitlig fremdrift og antal handlinger for hver kombination. Fremdrift på 75 % eller mere står med rødt.'));
+        const tb = el('table', 'rp-mx');
+        const hr = el('tr'); hr.append(el('th', '', ''));
+        lSpors.forEach((t) => hr.append(el('th', 'num', t)));
+        hr.append(el('th', 'num', 'I alt'));
+        const thead = el('thead'); thead.append(hr);
+        const tbody = el('tbody');
+        const cell = (sub, cls) => {
+          const st = stats(sub); const td = el('td', `num ${cls || ''}`);
+          if (!st.n) { td.textContent = '–'; return td; }
+          if (st.avg >= 75) td.classList.add('hi');
+          td.append(el('b', '', fmtPct(st.avg)), el('small', '', `(${st.n})`));
+          return td;
+        };
+        [...lAfds, 'I alt'].forEach((d) => {
+          const tr = el('tr', d === 'I alt' ? 'tot' : ''); tr.append(el('td', '', d));
+          const rowList = d === 'I alt' ? list : list.filter((a) => a.Afdeling === d);
+          lSpors.forEach((t) => tr.append(cell(rowList.filter((a) => a.Spor === t))));
+          tr.append(cell(rowList, 'tot'));
+          tbody.append(tr);
+        });
+        tb.append(thead, tbody);
+        nodes.push(tb);
+      }
+    }
+
+    const groups = groupList(list, o.group);
+    const groupHead = (g) => { const h = el('div', 'rp-group', g.name); h.append(el('small', '', `${g.items.length} ${g.items.length === 1 ? 'handling' : 'handlinger'}, ${fmtPct(stats(g.items).avg)} i snit`)); return h; };
+
+    // Handlingsliste
+    if (o.list) {
+      nodes.push(el('h2', '', 'Handlinger'));
+      groups.forEach((g) => {
+        if (g.name) nodes.push(groupHead(g));
+        const tb = el('table', 'rp-list');
+        const cg = el('colgroup');
+        ['9%', '44%', '19%', '10%', '10%', '8%'].forEach((w) => { const c = el('col'); c.style.width = w; cg.append(c); });
+        tb.append(cg);
+        const hr = el('tr');
+        [['Afd.', ''], ['Handling', ''], ['Spor', ''], ['Fremdrift', 'num'], ['Deadline', ''], ['Ansvarlig', '']].forEach(([h, c]) => hr.append(el('th', c, h)));
+        const thead = el('thead'); thead.append(hr);
+        const tbody = el('tbody');
+        g.items.forEach((a) => {
+          const tr = el('tr');
+          tr.append(el('td', '', a.Afdeling), el('td', '', a.Handling || '–'), el('td', '', a.Spor), el('td', 'num', `${a.Fremdrift} %`),
+            el('td', a.Forsinket ? 'late' : '', a.Deadline || '–'), el('td', '', a.Initialer || '–'));
+          tbody.append(tr);
+        });
+        tb.append(thead, tbody);
+        nodes.push(tb);
+      });
+    }
+
+    // Detaljer
+    if (o.det) {
+      nodes.push(el('h2', '', 'Detaljer for hver handling'));
+      groups.forEach((g) => {
+        if (g.name) nodes.push(groupHead(g));
+        g.items.forEach((a) => {
+          const it = el('section', 'rp-item');
+          const textLen = (a.Beskrivelse + a.Resultat + a.Statuslog).length;
+          if (textLen > 450) it.classList.add('is-long');
+          const tag = el('div', 'rp-item-tag'); const dot = el('i'); dot.style.background = trackColor(a.Spor);
+          tag.append(T(`${a.Afdeling}`), dot, T(a.Spor));
+          it.append(tag, el('h3', '', a.Handling || '–'));
+          const facts = el('div', 'rp-facts');
+          const fact = (label, node) => { const d = el('div'); d.append(el('span', '', label), node); return d; };
+          const prog = el('b'); const mini = el('span', 'rp-mini'); const mi = el('i', a.Fremdrift === 100 ? 'done' : ''); mi.style.width = `${a.Fremdrift}%`; mini.append(mi); prog.append(mini, T(`${a.Fremdrift} %`));
+          facts.append(
+            fact('Fremdrift', prog),
+            fact('Deadline', el('b', a.Forsinket ? 'late' : '', a.Forsinket ? `${a.Deadline}, forsinket` : (a.Deadline || '–'))),
+            fact('Ansvarlig', el('b', '', a.Ansvarlig || '–')),
+            fact('Status', el('b', '', a.Status)),
+          );
+          it.append(facts);
+          [['Beskrivelse', a.Beskrivelse, ''], ['Ønsket resultat', a.Resultat, ''], ['Statuslog', a.Statuslog, 'log'], ['Arbejdsgruppe', a.Arbejdsgruppe, '']].forEach(([l, v, c]) => {
+            if (!v) return;
+            const f = el('div', `rp-field ${c}`); f.append(el('span', '', l), el('p', '', v)); it.append(f);
+          });
+          nodes.push(it);
+        });
+      });
+    }
+
+    nodes.push(el('p', 'rp-end', 'Forsinket betyder, at deadline-kvartalet er passeret, og handlingen ikke står til 100 %. »Ongoing« tæller aldrig som forsinket. Tal og grafer er beregnet på de handlinger, der er med i rapporten.'));
+    R.replaceChildren(...nodes);
+    $('#rp-bar-title').textContent = o.title ? `DSGN Action Plans, ${o.title}` : 'DSGN Action Plans';
+  }
+
+  function showPreview() {
+    buildReport(opts());
+    $('#report-dlg').close();
+    $('#rp-view').hidden = false;
+    $('#rp-view').scrollTop = 0;
+    document.body.style.overflow = 'hidden';
+    $('#rp-print').focus();
+  }
+  function closePreview() {
+    $('#rp-view').hidden = true;
+    document.body.style.overflow = '';
+  }
+  const pdfTitle = () => {
+    const o = opts();
+    const d = new Date();
+    const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return `DSGN Action Plans ${o.title ? `${o.title} ` : ''}${date}`;
+  };
+
+  $('#report-btn').addEventListener('click', openReportDialog);
+  $('#rp-close').addEventListener('click', () => $('#report-dlg').close());
+  $('#rp-cancel').addEventListener('click', () => $('#report-dlg').close());
+  $('#report-dlg').addEventListener('click', (ev) => { if (ev.target === $('#report-dlg')) $('#report-dlg').close(); });
+  $('#rp-show').addEventListener('click', showPreview);
+  $('#rp-back').addEventListener('click', () => { closePreview(); openReportDialog(); });
+  $('#rp-print').addEventListener('click', () => window.print());
+  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && !$('#rp-view').hidden) closePreview(); });
+
+  // PDF-filnavn og Ctrl+P direkte fra dashboardet
+  let oldTitle = document.title;
+  window.addEventListener('beforeprint', () => {
+    oldTitle = document.title;
+    if ($('#rp-view').hidden) {
+      if (!actions.length) return;
+      drawTable();
+      buildReport(opts());
+      quickPrint = true;
+    }
+    document.title = pdfTitle();
+  });
+  window.addEventListener('afterprint', () => {
+    document.title = oldTitle;
+    quickPrint = false;
+  });
 
   /* ---------- Render ---------- */
   function render() {

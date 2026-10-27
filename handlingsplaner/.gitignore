@@ -1,0 +1,6 @@
+# Tal må aldrig ligge i dette offentlige repo
+*.csv
+*.xlsx
+*.xls
+*.json
+*.pdf

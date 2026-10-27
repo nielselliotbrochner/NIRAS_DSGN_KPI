@@ -279,6 +279,8 @@ button { font: inherit; color: inherit; }
 .ap-rp-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 22px; }
 .ap-rp-foot .ap-btn:disabled { opacity: .45; cursor: default; }
 
+.ap-ex-warn { font-size: 0.8125rem; color: var(--muted); line-height: 1.5; margin: 8px 0 0; padding-left: 12px; border-left: 2px solid var(--heritage); }
+
 /* ---------- Rapport: forhåndsvisning ---------- */
 .rp-view { position: fixed; inset: 0; z-index: 60; background: #E8E2DC; overflow: auto; }
 .rp-bar { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px clamp(16px, 4vw, 32px); background: rgba(255, 255, 255, 0.86); backdrop-filter: saturate(180%) blur(18px); -webkit-backdrop-filter: saturate(180%) blur(18px); border-bottom: 1px solid var(--hair); font-family: var(--font); }
@@ -398,6 +400,10 @@ button { font: inherit; color: inherit; }
         <button class="ap-btn ap-btn-ghost" type="button" id="report-btn">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 5.5V2h7v3.5M4.5 11.5h-2v-5a1 1 0 011-1h9a1 1 0 011 1v5h-2M4.5 9.5h7V14h-7z"/></svg>
           Lav rapport
+        </button>
+        <button class="ap-btn ap-btn-ghost" type="button" id="export-btn">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8M5 5.5l3-3 3 3M3 9v3.5a1 1 0 001 1h8a1 1 0 001-1V9"/></svg>
+          Eksportér
         </button>
         <button class="ap-btn" type="button" data-pick>
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11V2.5M4.5 6L8 2.5 11.5 6M2.5 10.5v2a1 1 0 001 1h9a1 1 0 001-1v-2"/></svg>
@@ -544,6 +550,24 @@ button { font: inherit; color: inherit; }
   </div>
 </dialog>
 
+<dialog class="ap-sheet ap-rp-dlg" id="export-dlg" aria-labelledby="ex-dlg-title">
+  <div class="ap-sheet-in">
+    <div class="ap-sheet-top">
+      <h2 id="ex-dlg-title" style="margin:0">Eksportér dashboard</h2>
+      <div class="ap-sheet-nav"><button type="button" id="ex-close" aria-label="Luk"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l8 8M11 3l-8 8"/></svg></button></div>
+    </div>
+    <div class="ap-rp-scope" id="ex-scope"></div>
+    <div class="ap-rp-toggles">
+      <label class="ap-rp-toggle"><div>Åbn med mine filtre og min sortering<small id="ex-view"></small></div><input type="checkbox" class="ap-switch" id="ex-keep"></label>
+    </div>
+    <p class="ap-ex-warn">Filen indeholder alle data fra CSV'en, også de handlinger, som filtrene skjuler. Send den kun til kolleger, der må se dem.</p>
+    <div class="ap-rp-foot">
+      <button class="ap-btn ap-btn-ghost" type="button" id="ex-cancel">Annuller</button>
+      <button class="ap-btn" type="button" id="ex-go">Hent HTML-fil</button>
+    </div>
+  </div>
+</dialog>
+
 <div class="rp-view" id="rp-view" hidden>
   <div class="rp-bar">
     <button class="ap-link-btn" type="button" id="rp-back">‹ Tilbage</button>
@@ -556,9 +580,16 @@ button { font: inherit; color: inherit; }
   <div class="rp-paper"><article class="rp" id="report"></article></div>
 </div>
 
+<script type="application/json" id="embedded-data">null</script>
 <script>
 (() => {
   'use strict';
+  // Sidens egen kildekode, før scriptet ændrer noget. Bruges, når dashboardet eksporteres med data.
+  const PRISTINE = `<!DOCTYPE html>\n${document.documentElement.outerHTML}`;
+  const readEmbedded = () => {
+    try { return JSON.parse(document.getElementById('embedded-data')?.textContent || 'null'); } catch { return null; }
+  };
+  let currentData = null;
 
   /* ---------- Konfiguration ---------- */
   // Spor-farver afledt af NIRAS CVI (Heritage Red, Deep Red, Sand)
@@ -692,7 +723,9 @@ button { font: inherit; color: inherit; }
 
   function showError(msg) { const e = $('#error'); e.textContent = msg; e.hidden = !msg; }
 
-  function loadText(text, name, at, fromUpload) {
+  // source: 'upload' (ny fil), 'stored' (husket i browseren) eller 'embedded' (indlejret i en eksporteret fil)
+  function loadText(text, name, at, source, exportedAt) {
+    const fromUpload = source === 'upload';
     const parsed = parseCSV(text);
     const missing = REQUIRED.filter((c) => !parsed.header.includes(c));
     if (missing.length) {
@@ -709,7 +742,11 @@ button { font: inherit; color: inherit; }
     $('#welcome').hidden = true;
     $('#dash').hidden = false;
     $('#actions').hidden = false;
-    $('#meta').textContent = `${name}, indlæst ${fmtDate(at)}`;
+    currentData = { name, at, text, source };
+    $('#meta').textContent = source === 'embedded'
+      ? `${name}, indlæst ${fmtDate(at)}. Delt som fil ${fmtDate(exportedAt)}.`
+      : `${name}, indlæst ${fmtDate(at)}`;
+    $('#forget').hidden = source === 'embedded';
     if (fromUpload) {
       const saved = store.set({ name, at, text });
       toast(saved ? `${fmtN(actions.length)} handlinger indlæst fra ${name}` : `${fmtN(actions.length)} handlinger indlæst. Browseren kunne ikke gemme filen til næste gang.`);
@@ -726,7 +763,7 @@ button { font: inherit; color: inherit; }
       return;
     }
     const reader = new FileReader();
-    reader.onload = () => loadText(String(reader.result), file.name, new Date().toISOString(), true);
+    reader.onload = () => loadText(String(reader.result), file.name, new Date().toISOString(), 'upload');
     reader.onerror = () => showError(`Filen »${file.name}« kunne ikke læses.`);
     reader.readAsText(file, 'utf-8');
   }
@@ -1319,6 +1356,50 @@ button { font: inherit; color: inherit; }
     quickPrint = false;
   });
 
+  /* ---------- Eksport som HTML med data ---------- */
+  const viewText = () => filterParts().map(([k, v]) => `${k}: ${v}`).join('. ') + '.';
+  function openExportDialog() {
+    if (!currentData) return;
+    const scope = $('#ex-scope');
+    scope.replaceChildren(
+      document.createTextNode('Du får én HTML-fil med dashboardet og alle '),
+      el('strong', '', `${fmtN(actions.length)} handlinger`),
+      document.createTextNode(' fra '), el('strong', '', currentData.name),
+      document.createTextNode('. Modtageren åbner filen i sin browser og ser dashboardet med det samme. Filen virker uden internet, og rapport og eksport virker også i den.'),
+    );
+    $('#ex-view').textContent = viewText();
+    if (!$('#export-dlg').open) $('#export-dlg').showModal();
+  }
+  function exportHtml() {
+    const now = new Date();
+    const payload = {
+      name: currentData.name,
+      at: currentData.at,
+      exportedAt: now.toISOString(),
+      text: currentData.text,
+      view: $('#ex-keep').checked ? { afd: state.afd, spor: state.spor, status: state.status, q: state.q, sortKey, sortDir } : null,
+    };
+    // Escape så data aldrig kan lukke script-tagget
+    const json = JSON.stringify(payload).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+    const re = /(<script type="application\/json" id="embedded-data">)[\s\S]*?(<\/script>)/;
+    if (!re.test(PRISTINE)) { toast('Eksporten mislykkedes. Hent den nyeste version af dashboardet og prøv igen.'); return; }
+    const html = PRISTINE.replace(re, (m, a, b) => a + json + b);
+    const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `DSGN_Action_Plans_${date}.html`;
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    $('#export-dlg').close();
+    toast(`DSGN_Action_Plans_${date}.html er hentet`);
+  }
+  $('#export-btn').addEventListener('click', openExportDialog);
+  $('#ex-close').addEventListener('click', () => $('#export-dlg').close());
+  $('#ex-cancel').addEventListener('click', () => $('#export-dlg').close());
+  $('#export-dlg').addEventListener('click', (ev) => { if (ev.target === $('#export-dlg')) $('#export-dlg').close(); });
+  $('#ex-go').addEventListener('click', exportHtml);
+
   /* ---------- Render ---------- */
   function render() {
     if (!actions.length) return;
@@ -1335,8 +1416,20 @@ button { font: inherit; color: inherit; }
   window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { if (actions.length) drawRings(); }, 150); });
 
   // Start: brug den senest uploadede fil, hvis browseren har den
-  const saved = store.get();
-  if (saved && saved.text) loadText(saved.text, saved.name || 'tidligere fil', saved.at || new Date().toISOString(), false);
+  // Start: data indlejret i en eksporteret fil går forud for den fil, browseren husker
+  const embedded = readEmbedded();
+  if (embedded && embedded.text) {
+    if (embedded.view) {
+      const v = embedded.view;
+      Object.assign(state, { afd: v.afd || 'Alle', spor: v.spor || 'Alle', status: STATUSES.includes(v.status) ? v.status : 'Alle', q: v.q || '' });
+      $('#q').value = state.q;
+      if (v.sortKey && SORT_LABELS[v.sortKey]) { sortKey = v.sortKey; sortDir = v.sortDir === -1 ? -1 : 1; }
+    }
+    loadText(embedded.text, embedded.name || 'delt fil', embedded.at || embedded.exportedAt, 'embedded', embedded.exportedAt);
+  } else {
+    const saved = store.get();
+    if (saved && saved.text) loadText(saved.text, saved.name || 'tidligere fil', saved.at || new Date().toISOString(), 'stored');
+  }
 })();
 </script>
 </body>

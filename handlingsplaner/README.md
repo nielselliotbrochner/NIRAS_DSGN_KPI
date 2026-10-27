@@ -14,6 +14,13 @@ Dashboard over handlingsplanerne i Buildings Design East (DSGN) i NIRAS CVI.
 - En tabel med søgning, sortering og filter på status. Klik på en handling for beskrivelse, ønsket resultat, statuslog og arbejdsgruppe.
 - Forsinket betyder, at deadline-kvartalet er passeret, og handlingen ikke står til 100 %. »Ongoing« tæller aldrig som forsinket.
 
+## Rapport som PDF
+
+- Klik på »Lav rapport«. Rapporten følger dashboardets filtre (afdeling, spor, status og søgning) og tabellens sortering, så du filtrerer først og printer bagefter.
+- Vælg titel, indhold (overblik, handlingsliste og detaljer for hver handling) og om handlingerne skal grupperes efter afdeling eller spor.
+- »Vis rapport« viser A4-siderne. »Gem som PDF« åbner browserens udskriftsvindue, hvor du vælger »Gem som PDF«.
+- Rapporten har hvid baggrund og kun små farvemarkeringer for at spare blæk. Tal og grafer beregnes på de handlinger, der er med.
+
 ## Filformat
 
 CSV med komma, semikolon eller tabulator som skilletegn. Første række er kolonnenavnene fra SharePoint-eksporten. Påkrævet: `Department`, `Strategic track`, `Action name`, `Completion`. Brugt hvis de findes: `Description`, `Result`, `Status log`, `Responsible`, `Working group`, `Deadline [quarter]` (fx `2026Q2` eller `Ongoing`) og `Link to plan`.
